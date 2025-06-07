@@ -25,15 +25,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.experiment.facedetector.R
-import com.experiment.facedetector.common.LogManager
-import com.experiment.facedetector.common.RequestPermission
 import com.experiment.facedetector.ui.screen.GalleryScreen
-import com.experiment.facedetector.ui.screen.SplashContent
 import com.experiment.facedetector.ui.screen.SplashScreen
-import com.experiment.facedetector.ui.screen.openAppSettingsWithToast
-import com.experiment.facedetector.ui.screen.readImagePermission
 import com.experiment.facedetector.ui.theme.AndroidFaceDetectorTheme
 
 class MainActivity : ComponentActivity() {

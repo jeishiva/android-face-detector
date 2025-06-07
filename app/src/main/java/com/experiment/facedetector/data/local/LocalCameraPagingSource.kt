@@ -5,6 +5,7 @@ import android.content.Context
 import android.provider.MediaStore
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import com.experiment.facedetector.common.LogManager
 import com.experiment.facedetector.domain.entities.UserImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -23,7 +24,6 @@ class LocalCameraPagingSource(
         return try {
             val page = params.key ?: 0
             val pageSize = params.loadSize
-
             val allImages = withContext(Dispatchers.IO) {
                 queryCameraImages()
             }
@@ -38,33 +38,32 @@ class LocalCameraPagingSource(
         }
     }
 
-
     private fun queryCameraImages(): List<UserImage> {
         val images = mutableListOf<UserImage>()
-
         val projection = arrayOf(
-            MediaStore.Images.Media._ID, MediaStore.Images.Media.RELATIVE_PATH
+            MediaStore.Images.Media._ID,
+            MediaStore.Images.Media.RELATIVE_PATH
         )
-
         val selection = "${MediaStore.Images.Media.RELATIVE_PATH} LIKE ?"
         val selectionArgs = arrayOf("%DCIM/Camera%")
         val sortOrder = "${MediaStore.Images.Media.DATE_ADDED} DESC"
-
         val queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         val cursor = context.contentResolver.query(
-            queryUri, projection, null, null, sortOrder
+            queryUri,
+            projection,
+            selection,
+            selectionArgs,
+            sortOrder
         )
-
         cursor?.use {
             val idCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(idCol)
                 val contentUri = ContentUris.withAppendedId(queryUri, id)
                 images.add(UserImage(id = id, contentUri = contentUri))
-                println("Camera Image: ID=$id, Path=$contentUri")
+                LogManager.d (message = "Camera Image: ID=$id, Path=$contentUri")
             }
         }
-
         return images
     }
 

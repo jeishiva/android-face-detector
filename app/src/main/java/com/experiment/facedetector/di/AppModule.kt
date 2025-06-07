@@ -11,7 +11,6 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import java.io.File
 import java.util.concurrent.TimeUnit
-import kotlin.time.Duration
 
 val appModule = module {
     factory { provideRepository(get()) }
@@ -21,7 +20,6 @@ val appModule = module {
     single {
        provideImageLoader(context = get(), okHttpClient = get())
     }
-    // Provide custom OkHttpClient
     single {
         OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS) // Connection timeout
@@ -49,7 +47,7 @@ fun provideImageLoader(context: Context, okHttpClient: OkHttpClient): ImageLoade
         .diskCache {
             DiskCache.Builder()
                 .directory(File(context.cacheDir, "image_cache"))
-                .maxSizeBytes(125L * 1024 * 1024) 
+                .maxSizeBytes(125L * 1024 * 1024)
                 .build()
         }
         .okHttpClient(okHttpClient)

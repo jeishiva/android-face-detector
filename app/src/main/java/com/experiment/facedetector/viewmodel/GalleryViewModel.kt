@@ -10,6 +10,11 @@ import kotlinx.coroutines.flow.Flow
 
 class GalleryViewModel(repository: UserImageRepository) : ViewModel() {
 
-    val userImageFlow: Flow<PagingData<UserImage>> = repository.getUserImageStream(30)
+    val userImageFlow: Flow<PagingData<UserImage>> = repository.getUserImageStream(PAGE_SIZE)
         .cachedIn(viewModelScope)
+
+     companion object {
+         const val PAGE_SIZE = 1
+     }
+
 }
