@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Photo Finder</string>\
+    <string name="gallery">Gallery</string>
+    <string name="image_permission_denied">Permission denied. Please enable it from settings.</string>
+</resources>
