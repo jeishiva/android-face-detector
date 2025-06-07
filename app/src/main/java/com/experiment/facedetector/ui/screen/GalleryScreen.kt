@@ -44,8 +44,7 @@ import kotlinx.coroutines.flow.Flow
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
-
-@Composable
+ @Composable
 fun GalleryScreen() {
     val viewModel: GalleryViewModel = koinViewModel()
     val imageLoader: ImageLoader = koinInject()
@@ -105,7 +104,6 @@ fun CameraImageGrid(
     }
 }
 
-// Handles load state and displays content, loading, or error
 @Composable
 private fun LoadStateContent(
     refreshState: LoadState,
