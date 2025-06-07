@@ -1,6 +1,7 @@
 package com.experiment.facedetector.ui.screen
 
 import android.R
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -60,9 +61,22 @@ fun GalleryScreen() {
                     .padding(innerPadding),
                 contentAlignment = Alignment.Center,
             ) {
-                CameraImageGrid(imagesFlow = viewModel.userImageFlow, imageLoader)
+                CameraImageGrid(imagesFlow = viewModel.userImageFlow,
+                    columns = getColumnCount(),
+                    spacing = 8.dp,
+                    imageLoader = imageLoader
+                )
             }
         }
+    }
+}
+
+@Composable
+fun getColumnCount(): Int {
+    return if(isLandscape()) {
+        6
+    } else {
+        3
     }
 }
 
@@ -71,8 +85,8 @@ fun CameraImageGrid(
     imagesFlow: Flow<PagingData<UserImage>>,
     imageLoader: ImageLoader,
     modifier: Modifier = Modifier,
-    columns: Int = 3,
-    spacing: Dp = 8.dp
+    columns: Int,
+    spacing: Dp,
 ) {
     val lazyPagingItems = imagesFlow.collectAsLazyPagingItems()
     LogManager.d("CameraImageGrid", "Item count: ${lazyPagingItems.itemCount}")
@@ -164,8 +178,8 @@ private fun ImageGridContent(
         columns = GridCells.Fixed(columns),
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(spacing),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(spacing),
+        horizontalArrangement = Arrangement.spacedBy(spacing)
     ) {
         items(lazyPagingItems.itemCount) { index ->
             val image = lazyPagingItems[index]
@@ -175,6 +189,12 @@ private fun ImageGridContent(
         }
         appendStateContent(appendState)
     }
+}
+
+@Composable
+fun isLandscape(): Boolean {
+    val configuration = LocalContext.current.resources.configuration
+    return configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 }
 
 @Composable
@@ -234,7 +254,7 @@ fun UserImageItem(
         model = ImageRequest.Builder(LocalContext.current)
             .data(image.contentUri)
             .crossfade(true)
-            .error(android.R.drawable.stat_notify_error)
+            .error(R.drawable.stat_notify_error)
             .listener(
                 onError = { _, result ->
                     LogManager.e("UserImageItem", "Failed to load image ${image.id}", result.throwable)
