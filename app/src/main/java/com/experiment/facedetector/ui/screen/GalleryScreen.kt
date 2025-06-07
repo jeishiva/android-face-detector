@@ -1,5 +1,7 @@
 package com.experiment.facedetector.ui.screen
 
+import android.R
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,6 +37,7 @@ import coil.request.ImageRequest
 import com.experiment.facedetector.common.LogManager
 import com.experiment.facedetector.domain.entities.UserImage
 import com.experiment.facedetector.ui.theme.AndroidFaceDetectorTheme
+import com.experiment.facedetector.ui.theme.MildGray
 import com.experiment.facedetector.viewmodel.GalleryViewModel
 import kotlinx.coroutines.flow.Flow
 import org.koin.androidx.compose.koinViewModel
@@ -73,8 +76,10 @@ fun CameraImageGrid(
 ) {
     val lazyPagingItems = imagesFlow.collectAsLazyPagingItems()
     LogManager.d("CameraImageGrid", "Item count: ${lazyPagingItems.itemCount}")
-
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center // Center all children
+    ) {
         LoadStateContent(
             refreshState = lazyPagingItems.loadState.refresh,
             appendState = lazyPagingItems.loadState.append,
@@ -124,8 +129,8 @@ private fun LoadingIndicator(
 ) {
     CircularProgressIndicator(
         modifier = modifier
-            .size(48.dp) // Fixed size for consistency
-            .padding(16.dp) // Optional padding for spacing
+            .size(72.dp)
+            .padding(16.dp)
     )
 }
 
@@ -139,7 +144,9 @@ private fun ErrorMessage(
         text = "Error loading images: ${error.message}",
         color = Color.Red,
         textAlign = TextAlign.Center,
-        modifier = modifier.padding(16.dp)
+        modifier = modifier
+            .fillMaxSize() // Fill available space for centering
+            .padding(16.dp) // Consistent padding
     )
 }
 
@@ -156,7 +163,9 @@ private fun ImageGridContent(
     LazyVerticalGrid(
         columns = GridCells.Fixed(columns),
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(spacing)
+        contentPadding = PaddingValues(spacing),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(lazyPagingItems.itemCount) { index ->
             val image = lazyPagingItems[index]
@@ -172,9 +181,15 @@ private fun ImageGridContent(
 private fun calculateImageSize(columns: Int, spacing: Dp): Dp {
     val context = LocalContext.current
     val screenWidthPx = context.resources.displayMetrics.widthPixels
-    val spacingPx = with(LocalDensity.current) { spacing.toPx() }
-    val totalSpacingPx = spacingPx * (columns + 1)
-    return with(LocalDensity.current) { ((screenWidthPx - totalSpacingPx) / columns).toInt().toDp() }
+    val density = LocalDensity.current
+
+    val spacingPx = with(density) { spacing.toPx() }// between columns only
+    val totalSpacingPx = spacingPx * (columns - 1)
+
+    val availableWidthPx = screenWidthPx - totalSpacingPx
+    val imageSizePx = availableWidthPx / columns
+
+    return with(density) { imageSizePx.toDp() }
 }
 
 private fun LazyGridScope.appendStateContent(appendState: LoadState) {
@@ -233,7 +248,7 @@ fun UserImageItem(
         modifier = modifier
             .size(size)
             .clip(RoundedCornerShape(8.dp)),
-        placeholder = ColorPainter(Color.Gray),
+        placeholder = ColorPainter(MildGray),
         contentScale = ContentScale.Crop,
         imageLoader = imageLoader
     )
