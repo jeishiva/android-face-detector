@@ -1,11 +1,8 @@
-package com.experiment.facedetector
+package com.experiment.facedetector.common
 
-import android.content.Context
-import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.*
-import androidx.core.content.ContextCompat
 
 @Composable
 fun RequestPermission(
@@ -28,8 +25,3 @@ fun RequestPermission(
     }
 }
 
-fun checkPermissions(context: Context, permissions: List<String>): Boolean {
-    return permissions.all { permission ->
-        ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
-    }
-}
