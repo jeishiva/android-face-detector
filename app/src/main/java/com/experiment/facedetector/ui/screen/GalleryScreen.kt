@@ -12,9 +12,16 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,7 +51,8 @@ import kotlinx.coroutines.flow.Flow
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
- @Composable
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun GalleryScreen() {
     val viewModel: GalleryViewModel = koinViewModel()
     val imageLoader: ImageLoader = koinInject()
@@ -52,6 +60,16 @@ fun GalleryScreen() {
 
     AndroidFaceDetectorTheme {
         Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Gallery") },
+                    navigationIcon = {
+                        IconButton(onClick = {  }) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        }
+                    }
+                )
+            },
             containerColor = Color.Transparent, modifier = Modifier.fillMaxSize()
         ) { innerPadding ->
             Box(
