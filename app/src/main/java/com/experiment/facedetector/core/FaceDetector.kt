@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Matrix
 import android.graphics.Rect
 import androidx.exifinterface.media.ExifInterface
 import androidx.exifinterface.media.ExifInterface.*
@@ -43,9 +44,16 @@ class FaceDetectionProcessor(
         )
         val bitmap = decodeBitmap(userImage, sampleSize)
         val thumbnail = createThumbnail(bitmap, THUMBNAIL_SIZE)
+        val rotatedThumbnail = rotateBitmapIfNeeded(thumbnail, rotationDegrees)
         val faces = detectFaces(bitmap)
+        FaceImage(userImage, faces, rotatedThumbnail)
+    }
 
-        FaceImage(userImage, faces, thumbnail)
+    private fun rotateBitmapIfNeeded(bitmap: Bitmap, rotationDegrees: Int): Bitmap {
+        if (rotationDegrees == 0) return bitmap
+        val matrix = Matrix().apply { postRotate(rotationDegrees.toFloat()) }
+        val rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+        return rotatedBitmap
     }
 
     private fun getImageRotation(userImage: UserImage): Int {
