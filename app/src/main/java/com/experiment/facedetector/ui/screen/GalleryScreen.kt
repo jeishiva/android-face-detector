@@ -1,6 +1,5 @@
 package com.experiment.facedetector.ui.screen
 
-import android.R
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,7 +13,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -32,7 +30,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
@@ -43,7 +40,7 @@ import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.experiment.facedetector.common.LogManager
-import com.experiment.facedetector.domain.entities.UserImage
+import com.experiment.facedetector.domain.entities.FaceImage
 import com.experiment.facedetector.ui.theme.AndroidFaceDetectorTheme
 import com.experiment.facedetector.ui.theme.MildGray
 import com.experiment.facedetector.viewmodel.GalleryViewModel
@@ -91,15 +88,15 @@ fun GalleryScreen() {
 @Composable
 fun getColumnCount(): Int {
     return if(isLandscape()) {
-        6
+        4
     } else {
-        3
+        2
     }
 }
 
 @Composable
 fun CameraImageGrid(
-    imagesFlow: Flow<PagingData<UserImage>>,
+    imagesFlow: Flow<PagingData<FaceImage>>,
     imageLoader: ImageLoader,
     modifier: Modifier = Modifier,
     columns: Int,
@@ -109,7 +106,7 @@ fun CameraImageGrid(
     LogManager.d("CameraImageGrid", "Item count: ${lazyPagingItems.itemCount}")
     Box(
         modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center // Center all children
+        contentAlignment = Alignment.Center
     ) {
         LoadStateContent(
             refreshState = lazyPagingItems.loadState.refresh,
@@ -126,7 +123,7 @@ fun CameraImageGrid(
 private fun LoadStateContent(
     refreshState: LoadState,
     appendState: LoadState,
-    lazyPagingItems: LazyPagingItems<UserImage>,
+    lazyPagingItems: LazyPagingItems<FaceImage>,
     imageLoader: ImageLoader,
     columns: Int,
     spacing: Dp
@@ -175,15 +172,15 @@ private fun ErrorMessage(
         color = Color.Red,
         textAlign = TextAlign.Center,
         modifier = modifier
-            .fillMaxSize() // Fill available space for centering
-            .padding(16.dp) // Consistent padding
+            .fillMaxSize()
+            .padding(16.dp)
     )
 }
 
 // Renders the grid of images
 @Composable
 private fun ImageGridContent(
-    lazyPagingItems: LazyPagingItems<UserImage>,
+    lazyPagingItems: LazyPagingItems<FaceImage>,
     imageLoader: ImageLoader,
     columns: Int,
     spacing: Dp,
@@ -219,7 +216,7 @@ private fun calculateImageSize(columns: Int, spacing: Dp): Dp {
     val screenWidthPx = context.resources.displayMetrics.widthPixels
     val density = LocalDensity.current
 
-    val spacingPx = with(density) { spacing.toPx() }// between columns only
+    val spacingPx = with(density) { spacing.toPx() }
     val totalSpacingPx = spacingPx * (columns - 1)
 
     val availableWidthPx = screenWidthPx - totalSpacingPx
@@ -235,6 +232,7 @@ private fun LazyGridScope.appendStateContent(appendState: LoadState) {
                 CircularProgressIndicator(
                     modifier = Modifier
                         .fillMaxSize()
+                        .size(72.dp)
                         .padding(16.dp)
                 )
                 LogManager.d("CameraImageGrid", "Append state: Loading")
@@ -254,14 +252,14 @@ private fun LazyGridScope.appendStateContent(appendState: LoadState) {
             }
         }
         else -> {
+
         }
     }
 }
 
-// Displays a single user image item
 @Composable
 fun UserImageItem(
-    image: UserImage,
+    image: FaceImage,
     size: Dp,
     imageLoader: ImageLoader,
     modifier: Modifier = Modifier
@@ -270,17 +268,17 @@ fun UserImageItem(
         model = ImageRequest.Builder(LocalContext.current)
             .data(image.contentUri)
             .crossfade(true)
-            .error(R.drawable.stat_notify_error)
+            .error(android.R.drawable.stat_notify_error)
             .listener(
                 onError = { _, result ->
-                    LogManager.e("UserImageItem", "Failed to load image ${image.id}", result.throwable)
+                    LogManager.e("UserImageItem", "Failed to load image ${image.mediaId}", result.throwable)
                 },
                 onSuccess = { _, _ ->
-                    LogManager.d("UserImageItem", "Loaded image ${image.id}")
+                    LogManager.d("UserImageItem", "Loaded image ${image.mediaId}")
                 }
             )
             .build(),
-        contentDescription = "Image with ID ${image.id} from camera",
+        contentDescription = "Image with ID ${image.mediaId} from camera",
         modifier = modifier
             .size(size)
             .clip(RoundedCornerShape(8.dp)),

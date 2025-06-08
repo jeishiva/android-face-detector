@@ -60,7 +60,7 @@ class LocalCameraPagingSource(
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(idCol)
                 val contentUri = ContentUris.withAppendedId(queryUri, id)
-                images.add(UserImage(id = id, contentUri = contentUri))
+                images.add(UserImage(mediaId = id, contentUri = contentUri))
                 LogManager.d (message = "Camera Image: ID=$id, Path=$contentUri")
             }
         }

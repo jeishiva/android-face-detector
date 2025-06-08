@@ -4,18 +4,23 @@ import android.content.Context
 import coil.ImageLoader
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
+import com.experiment.facedetector.core.FaceDetectionProcessor
 import com.experiment.facedetector.repo.UserImageRepository
 import com.experiment.facedetector.viewmodel.GalleryViewModel
+import com.google.mlkit.vision.face.FaceDetection
+import com.google.mlkit.vision.face.FaceDetector
+import com.google.mlkit.vision.face.FaceDetectorOptions
 import okhttp3.OkHttpClient
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import java.io.File
 import java.util.concurrent.TimeUnit
+import kotlin.math.sin
 
 val appModule = module {
     factory { provideRepository(get()) }
     viewModel {
-        GalleryViewModel(get())
+        GalleryViewModel(get(), get())
     }
     single {
        provideImageLoader(context = get(), okHttpClient = get())
@@ -34,8 +39,22 @@ val appModule = module {
             }
             .build()
     }
+    single {
+        provideFaceDetector()
+    }
+    single {
+        FaceDetectionProcessor(get(), get())
+    }
 }
 
+fun provideFaceDetector(): FaceDetector {
+    val options = FaceDetectorOptions.Builder()
+        .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
+        .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_NONE)
+        .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_NONE)
+        .build()
+    return FaceDetection.getClient(options)
+}
 
 fun provideImageLoader(context: Context, okHttpClient: OkHttpClient): ImageLoader {
     return ImageLoader.Builder(context)
