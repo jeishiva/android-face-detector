@@ -45,6 +45,9 @@ class FaceDetectionProcessor(
         val bitmap = decodeBitmap(userImage, sampleSize)
         val thumbnail = createThumbnail(bitmap, THUMBNAIL_SIZE)
         val rotatedThumbnail = rotateBitmapIfNeeded(thumbnail, rotationDegrees)
+        if (bitmap != rotatedThumbnail) {
+            BitmapPool.put(bitmap)
+        }
         val faces = detectFaces(bitmap)
         FaceImage(userImage, faces, rotatedThumbnail)
     }
