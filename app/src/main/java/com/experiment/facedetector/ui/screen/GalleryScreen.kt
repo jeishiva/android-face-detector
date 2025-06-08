@@ -177,7 +177,6 @@ private fun ErrorMessage(
     )
 }
 
-// Renders the grid of images
 @Composable
 private fun ImageGridContent(
     lazyPagingItems: LazyPagingItems<FaceImage>,
@@ -215,7 +214,6 @@ private fun calculateImageSize(columns: Int, spacing: Dp): Dp {
     val context = LocalContext.current
     val screenWidthPx = context.resources.displayMetrics.widthPixels
     val density = LocalDensity.current
-
     val spacingPx = with(density) { spacing.toPx() }
     val totalSpacingPx = spacingPx * (columns - 1)
 

@@ -40,7 +40,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -60,4 +59,6 @@ dependencies {
     implementation(libs.koin.compose)
     implementation(libs.coil.compose)
     implementation(libs.paging.compose)
+    implementation(libs.paging.common)
+    implementation(libs.face.detection.v1615)
 }

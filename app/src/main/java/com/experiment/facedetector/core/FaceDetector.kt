@@ -12,4 +12,5 @@ class FaceDetectionProcessor(private val context: Context, private val faceDetec
     suspend fun processImage(userImage: UserImage): FaceImage = withContext(Dispatchers.Default) {
         FaceImage(userImage.mediaId, userImage.contentUri, null)
     }
+
 }

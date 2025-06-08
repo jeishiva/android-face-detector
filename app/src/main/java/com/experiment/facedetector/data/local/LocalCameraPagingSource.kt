@@ -1,7 +1,9 @@
 package com.experiment.facedetector.data.local
 
+import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
+import android.os.Bundle
 import android.provider.MediaStore
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
@@ -22,12 +24,11 @@ class LocalCameraPagingSource(
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UserImage> {
         return try {
-            val page = params.key ?: 0
-            val pageSize = params.loadSize
-            val allImages = withContext(Dispatchers.IO) {
-                queryCameraImages()
+            val     page = params.key ?: 0
+            val offset = page * pageSize
+            val pagedImages = withContext(Dispatchers.IO) {
+                queryCameraImages(limit = pageSize, offset = offset)
             }
-            val pagedImages = allImages.drop(page * pageSize).take(pageSize)
             LoadResult.Page(
                 data = pagedImages,
                 prevKey = if (page == 0) null else page - 1,
@@ -38,7 +39,8 @@ class LocalCameraPagingSource(
         }
     }
 
-    private fun queryCameraImages(): List<UserImage> {
+
+    private fun queryCameraImages(limit: Int, offset: Int): List<UserImage> {
         val images = mutableListOf<UserImage>()
         val projection = arrayOf(
             MediaStore.Images.Media._ID,
@@ -46,25 +48,36 @@ class LocalCameraPagingSource(
         )
         val selection = "${MediaStore.Images.Media.RELATIVE_PATH} LIKE ?"
         val selectionArgs = arrayOf("%DCIM/Camera%")
-        val sortOrder = "${MediaStore.Images.Media.DATE_ADDED} DESC"
         val queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+
+        val queryArgs = Bundle().apply {
+            putString(ContentResolver.QUERY_ARG_SQL_SELECTION, selection)
+            putStringArray(ContentResolver.QUERY_ARG_SQL_SELECTION_ARGS, selectionArgs)
+            putStringArray(ContentResolver.QUERY_ARG_SORT_COLUMNS, arrayOf(MediaStore.Images.Media.DATE_TAKEN))
+            putInt(ContentResolver.QUERY_ARG_SORT_DIRECTION, ContentResolver.QUERY_SORT_DIRECTION_DESCENDING)
+            putInt(ContentResolver.QUERY_ARG_LIMIT, limit)
+            putInt(ContentResolver.QUERY_ARG_OFFSET, offset)
+        }
+
         val cursor = context.contentResolver.query(
             queryUri,
             projection,
-            selection,
-            selectionArgs,
-            sortOrder
+            queryArgs,
+            null
         )
+
         cursor?.use {
             val idCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(idCol)
                 val contentUri = ContentUris.withAppendedId(queryUri, id)
                 images.add(UserImage(mediaId = id, contentUri = contentUri))
-                LogManager.d (message = "Camera Image: ID=$id, Path=$contentUri")
+                LogManager.d(message = "Camera Image: ID=$id, Path=$contentUri")
             }
         }
+
         return images
     }
+
 
 }

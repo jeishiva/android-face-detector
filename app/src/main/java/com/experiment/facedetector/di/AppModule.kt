@@ -15,7 +15,6 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import java.io.File
 import java.util.concurrent.TimeUnit
-import kotlin.math.sin
 
 val appModule = module {
     factory { provideRepository(get()) }
