@@ -264,19 +264,19 @@ fun UserImageItem(
 ) {
     AsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
-            .data(image.contentUri)
+            .data(image.thumbnail)
             .crossfade(true)
             .error(android.R.drawable.stat_notify_error)
             .listener(
                 onError = { _, result ->
-                    LogManager.e("UserImageItem", "Failed to load image ${image.mediaId}", result.throwable)
+                    LogManager.e("UserImageItem", "Failed to load image ${image.userImage.mediaId}", result.throwable)
                 },
                 onSuccess = { _, _ ->
-                    LogManager.d("UserImageItem", "Loaded image ${image.mediaId}")
+                    LogManager.d("UserImageItem", "Loaded image ${image.userImage.mediaId}")
                 }
             )
             .build(),
-        contentDescription = "Image with ID ${image.mediaId} from camera",
+        contentDescription = "Image with ID ${image.userImage.mediaId} from camera",
         modifier = modifier
             .size(size)
             .clip(RoundedCornerShape(8.dp)),

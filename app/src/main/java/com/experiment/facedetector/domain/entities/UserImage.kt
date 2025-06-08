@@ -1,7 +1,8 @@
 package com.experiment.facedetector.domain.entities
 
+import android.graphics.Bitmap
 import android.net.Uri
-import java.io.File
+import com.google.mlkit.vision.face.Face
 
 data class UserImage(
     val mediaId: Long,
@@ -9,7 +10,7 @@ data class UserImage(
 )
 
 data class FaceImage(
-    val mediaId: Long,
-    val contentUri: Uri,
-    var file : File? = null
+    val userImage: UserImage,
+    val faces: List<Face>,
+    val thumbnail: Bitmap,
 )

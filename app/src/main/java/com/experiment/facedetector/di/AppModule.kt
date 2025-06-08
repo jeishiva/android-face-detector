@@ -17,9 +17,11 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 val appModule = module {
-    factory { provideRepository(get()) }
+    factory {
+        UserImageRepository(get(), get())
+    }
     viewModel {
-        GalleryViewModel(get(), get())
+        GalleryViewModel(get())
     }
     single {
        provideImageLoader(context = get(), okHttpClient = get())
@@ -72,6 +74,4 @@ fun provideImageLoader(context: Context, okHttpClient: OkHttpClient): ImageLoade
         .build()
 }
 
-fun provideRepository(context: Context): UserImageRepository {
-    return UserImageRepository(context)
-}
+
