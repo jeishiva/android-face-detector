@@ -34,7 +34,6 @@ class FaceDetectionProcessor(
     suspend fun processImage(userImage: UserImage): FaceImage = withContext(Dispatchers.IO) {
         val rotationDegrees = getImageRotation(userImage)
         val (originalWidth, originalHeight) = getImageDimensions(userImage)
-
         val (sampleWidth, sampleHeight) = when (rotationDegrees) {
             90, 270 -> originalHeight to originalWidth
             else -> originalWidth to originalHeight
@@ -49,27 +48,10 @@ class FaceDetectionProcessor(
             BitmapPool.put(bitmap)
         }
         val faces = detectFaces(rotated)
-        val final = drawFaceBoundingBoxes(rotated, faces)
-        FaceImage(userImage, faces, final)
+        FaceImage(userImage, faces, rotated)
     }
 
-    fun drawFaceBoundingBoxes(
-        originalBitmap: Bitmap,
-        faces: List<Face>
-    ): Bitmap {
-        val mutableBitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true)
-        val canvas = Canvas(mutableBitmap)
-        val paint = Paint().apply {
-            color = Color.GREEN
-            style = Paint.Style.STROKE
-            strokeWidth = 4f
-        }
-        for (face in faces) {
-            val bounds = face.boundingBox
-            canvas.drawRect(bounds, paint)
-        }
-        return mutableBitmap
-    }
+
 
     private fun rotateBitmapIfNeeded(bitmap: Bitmap, rotationDegrees: Int): Bitmap {
         if (rotationDegrees == 0) return bitmap

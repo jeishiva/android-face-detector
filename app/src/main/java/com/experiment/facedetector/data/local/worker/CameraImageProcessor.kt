@@ -7,6 +7,9 @@ import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.os.Bundle
 import android.provider.MediaStore
 import com.experiment.facedetector.common.ImageHelper
@@ -17,6 +20,7 @@ import com.experiment.facedetector.data.local.dao.MediaDao
 import com.experiment.facedetector.data.local.entities.MediaEntity
 import com.experiment.facedetector.domain.entities.UserImage
 import com.experiment.facedetector.repo.UserImageRepository
+import com.google.mlkit.vision.face.Face
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -39,8 +43,10 @@ class CameraImageProcessor(
             for (image in missingImages) {
                 try {
                     val faceImage = faceDetectionProcessor.processImage(image)
-                    saveFaceImageAndThumbnail(faceImage)?.let {
-                        mediaEntityList.add(it)
+                    if (faceImage.faces.isNotEmpty()) {
+                        saveFaceImageAndThumbnail(faceImage)?.let {
+                            mediaEntityList.add(it)
+                        }
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -56,10 +62,11 @@ class CameraImageProcessor(
 
     private suspend fun saveFaceImageAndThumbnail(faceImage: FaceImage): MediaEntity? {
         try {
+            val draw = drawFaceBoundingBoxes(faceImage.thumbnail, faceImage.faces)
             LogManager.d(message = "work save face image called")
             val file = ImageHelper.saveBitmap(
                 context,
-                faceImage.thumbnail,
+                draw,
                 "${AppConfig.THUMBNAIL_FILE_PREFIX}${faceImage.userImage.mediaId}",
                 Bitmap.CompressFormat.WEBP,
                 70
@@ -79,6 +86,27 @@ class CameraImageProcessor(
         return null
     }
 
+    fun drawFaceBoundingBoxes(
+        originalBitmap: Bitmap,
+        faces: List<Face>
+    ): Bitmap {
+        if (faces.isEmpty()) {
+            return originalBitmap
+        }
+        val mutableBitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true)
+        val canvas = Canvas(mutableBitmap)
+        val paint = Paint().apply {
+            color = Color.GREEN
+            style = Paint.Style.STROKE
+            strokeWidth = 6f
+        }
+        for (face in faces) {
+            val bounds = face.boundingBox
+            canvas.drawRect(bounds, paint)
+        }
+        return mutableBitmap
+    }
+
     private fun queryCameraImages(limit: Int, offset: Int): List<UserImage> {
         val images = mutableListOf<UserImage>()
         val projection = arrayOf(
@@ -91,8 +119,14 @@ class CameraImageProcessor(
         val queryArgs = Bundle().apply {
             putString(ContentResolver.QUERY_ARG_SQL_SELECTION, selection)
             putStringArray(ContentResolver.QUERY_ARG_SQL_SELECTION_ARGS, selectionArgs)
-            putStringArray(ContentResolver.QUERY_ARG_SORT_COLUMNS, arrayOf(MediaStore.Images.Media.DATE_TAKEN))
-            putInt(ContentResolver.QUERY_ARG_SORT_DIRECTION, ContentResolver.QUERY_SORT_DIRECTION_DESCENDING)
+            putStringArray(
+                ContentResolver.QUERY_ARG_SORT_COLUMNS,
+                arrayOf(MediaStore.Images.Media.DATE_TAKEN)
+            )
+            putInt(
+                ContentResolver.QUERY_ARG_SORT_DIRECTION,
+                ContentResolver.QUERY_SORT_DIRECTION_DESCENDING
+            )
             putInt(ContentResolver.QUERY_ARG_LIMIT, limit)
             putInt(ContentResolver.QUERY_ARG_OFFSET, offset)
         }

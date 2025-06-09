@@ -24,7 +24,7 @@ class GalleryViewModel(
         config = PagingConfig(
             pageSize = 20,
             enablePlaceholders = true,
-            initialLoadSize = 20
+            initialLoadSize = 8
         )
     ) {
         mediaDao.getPagedMedia2()
