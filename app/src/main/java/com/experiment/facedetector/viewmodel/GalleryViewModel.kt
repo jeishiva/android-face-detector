@@ -7,6 +7,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
+import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.experiment.facedetector.data.local.dao.MediaDao
@@ -43,11 +44,15 @@ class GalleryViewModel(
         .cachedIn(viewModelScope)
 
     fun startInitialWork() {
-        val workRequest = OneTimeWorkRequestBuilder<CameraImageWorker>().build()
-        workManager.enqueue(workRequest)
+        val workRequest = OneTimeWorkRequestBuilder<CameraImageWorker>()
+            .addTag("camera_image_work")
+            .build()
+        workManager.enqueueUniqueWork(
+            "camera_image_work",
+            ExistingWorkPolicy.REPLACE,
+            workRequest
+        )
     }
-
-    
 
     companion object {
         const val PAGE_SIZE = 10
