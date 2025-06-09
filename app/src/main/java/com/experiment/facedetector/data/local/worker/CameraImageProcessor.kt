@@ -41,7 +41,6 @@ class CameraImageProcessor(
                     LogManager.e(message = "Failed processing image ${image.contentUri}: ${e.message}")
                 }
             }
-            userImageRepository.invalidatePagingSource()
             page++
         }
     }
