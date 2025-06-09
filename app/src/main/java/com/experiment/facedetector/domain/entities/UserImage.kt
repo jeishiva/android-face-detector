@@ -16,6 +16,7 @@ data class FaceImage(
     val thumbnail: Bitmap,
 )
 
+@Serializable
 data class UIImage(
     val mediaId: Long,
     val file : File

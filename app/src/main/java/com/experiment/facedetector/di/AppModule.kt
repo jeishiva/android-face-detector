@@ -8,6 +8,7 @@ import coil.memory.MemoryCache
 import com.experiment.facedetector.core.FaceDetectionProcessor
 import com.experiment.facedetector.data.local.worker.CameraImageWorker
 import com.experiment.facedetector.repo.UserImageRepository
+import com.experiment.facedetector.viewmodel.FullImageViewModel
 import com.experiment.facedetector.viewmodel.GalleryViewModel
 import com.experiment.facedetector.viewmodel.SplashViewModel
 import com.google.mlkit.vision.face.FaceDetection
@@ -52,6 +53,7 @@ val appModule = module {
     }
     viewModel { GalleryViewModel(get(), get(), get()) }
     viewModel { SplashViewModel() }
+    viewModel { FullImageViewModel() }
     worker {
         CameraImageWorker(get(), get(), get(), get(), get())
     }
