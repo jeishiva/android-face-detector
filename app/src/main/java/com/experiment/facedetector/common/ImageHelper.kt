@@ -12,7 +12,6 @@ import androidx.exifinterface.media.ExifInterface.ORIENTATION_NORMAL
 import androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_180
 import androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_270
 import androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_90
-import androidx.exifinterface.media.ExifInterface.ORIENTATION_UNDEFINED
 import androidx.exifinterface.media.ExifInterface.TAG_ORIENTATION
 import java.io.BufferedInputStream
 import java.io.File
@@ -105,10 +104,10 @@ object ImageHelper {
         inputStream.mark(Int.MAX_VALUE)
         return try {
             val exif = ExifInterface(inputStream)
-            when (exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)) {
-                ExifInterface.ORIENTATION_ROTATE_90 -> 90
-                ExifInterface.ORIENTATION_ROTATE_180 -> 180
-                ExifInterface.ORIENTATION_ROTATE_270 -> 270
+            when (exif.getAttributeInt(TAG_ORIENTATION, ORIENTATION_NORMAL)) {
+                ORIENTATION_ROTATE_90 -> 90
+                ORIENTATION_ROTATE_180 -> 180
+                ORIENTATION_ROTATE_270 -> 270
                 else -> 0
             }
         } finally {
