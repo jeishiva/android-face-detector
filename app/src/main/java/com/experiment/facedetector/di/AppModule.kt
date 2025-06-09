@@ -22,7 +22,7 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 val appModule = module {
-    factory {
+    single {
         UserImageRepository(get(), get())
     }
     single {
@@ -54,7 +54,7 @@ val appModule = module {
     viewModel { GalleryViewModel(get()) }
     viewModel { SplashViewModel(get()) }
     worker {
-        CameraImageWorker(get(), get(), get(), get())
+        CameraImageWorker(get(), get(), get(), get(), get())
     }
 }
 

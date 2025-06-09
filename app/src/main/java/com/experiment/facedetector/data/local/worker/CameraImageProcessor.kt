@@ -10,14 +10,18 @@ import android.os.Bundle
 import android.provider.MediaStore
 import com.experiment.facedetector.common.LogManager
 import com.experiment.facedetector.core.FaceDetectionProcessor
+import com.experiment.facedetector.data.local.dao.MediaDao
 import com.experiment.facedetector.domain.entities.UserImage
+import com.experiment.facedetector.repo.UserImageRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class CameraImageProcessor(
     private val context: Context,
-    private val pageSize: Int = 50,
+    private val pageSize: Int = 5,
     private val faceDetectionProcessor: FaceDetectionProcessor,
+    private val mediaDao: MediaDao,
+    private val userImageRepository: UserImageRepository,
     private val saveCallback: suspend (faceImage: FaceImage) -> Unit,
 ) {
 
@@ -25,7 +29,9 @@ class CameraImageProcessor(
         var page = 0
         while (true) {
             val images = queryCameraImages(pageSize, page * pageSize)
-            if (images.isEmpty()) break
+            val allIds = images.map { it.mediaId }
+            val existingIds = mediaDao.getExistingMediaIds(allIds)
+            val missingImages = images.filterNot { it.mediaId in existingIds }
             for (image in images) {
                 try {
                     val faceImage = faceDetectionProcessor.processImage(image)

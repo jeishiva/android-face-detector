@@ -7,6 +7,7 @@ import androidx.work.WorkerParameters
 import com.experiment.facedetector.core.FaceDetectionProcessor
 import com.experiment.facedetector.data.local.dao.MediaDao
 import com.experiment.facedetector.data.local.worker.CameraImageWorker
+import com.experiment.facedetector.repo.UserImageRepository
 import org.koin.core.Koin
 
 class KoinWorkerFactory(private val koin: Koin) : WorkerFactory() {
@@ -22,13 +23,13 @@ class KoinWorkerFactory(private val koin: Koin) : WorkerFactory() {
             else -> null
         }
     }
-
     private fun getCameraImageWorker(
         appContext: Context,
         workerParameters: WorkerParameters
     ): CameraImageWorker {
         val processor: FaceDetectionProcessor = koin.get()
         val mediaDao: MediaDao = koin.get()
-        return CameraImageWorker(appContext, workerParameters, processor, mediaDao)
+        val repo: UserImageRepository = koin.get()
+        return CameraImageWorker(appContext, workerParameters, processor, mediaDao, repo)
     }
 }

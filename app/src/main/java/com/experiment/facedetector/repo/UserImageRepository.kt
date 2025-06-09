@@ -13,10 +13,17 @@ class UserImageRepository(
     private val context: Context,
     private val mediaDao: MediaDao,
 ) {
+    private var currentPagingSource: LocalCameraPagingSource? = null
+
     fun getUserImageStream(pageSize: Int): Flow<PagingData<UIImage>> {
         return Pager(
             config = PagingConfig(pageSize = pageSize), pagingSourceFactory = {
-                LocalCameraPagingSource(mediaDao)
+                currentPagingSource = LocalCameraPagingSource(mediaDao)
+                currentPagingSource!!
             }).flow
+    }
+
+    fun invalidatePagingSource() {
+        currentPagingSource?.invalidate()
     }
 }

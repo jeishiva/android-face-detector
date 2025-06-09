@@ -21,4 +21,8 @@ interface MediaDao {
 
     @Delete
     suspend fun deleteMedia(media: MediaEntity)
+
+    @Query("SELECT mediaId FROM media WHERE mediaId IN (:mediaIds)")
+    suspend fun getExistingMediaIds(mediaIds: List<Long>): List<Long>
+
 }

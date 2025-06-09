@@ -194,7 +194,12 @@ private fun ImageGridContent(
         verticalArrangement = Arrangement.spacedBy(spacing),
         horizontalArrangement = Arrangement.spacedBy(spacing)
     ) {
-        items(lazyPagingItems.itemCount) { index ->
+        items(
+            count = lazyPagingItems.itemCount,
+            key = {
+                index -> lazyPagingItems[index]?.mediaId ?: index
+            }
+        ) { index ->
             val image = lazyPagingItems[index]
             if (image != null) {
                 UserImageItem(image, imageSize, imageLoader)

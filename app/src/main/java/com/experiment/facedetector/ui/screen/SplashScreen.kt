@@ -45,11 +45,7 @@ fun SplashScreen(onComplete: () -> Unit) {
     val viewModel: SplashViewModel = koinViewModel()
     var workedStarted by rememberSaveable { mutableStateOf(false) }
 
-    if (workedStarted.not()) {
-        workedStarted = true
-        viewModel.startInitialWork()
-        LogManager.d(message = "start work")
-    }
+
     LaunchedEffect(Unit) {
         kotlinx.coroutines.delay(1000)
         showPermissionRequest = true
@@ -71,6 +67,11 @@ fun SplashScreen(onComplete: () -> Unit) {
                         permissionGranted = granted
                         if (granted) {
                             onComplete()
+                            if (workedStarted.not()) {
+                                workedStarted = true
+                                viewModel.startInitialWork()
+                                LogManager.d(message = "start work")
+                            }
                         } else {
                             openAppSettingsWithToast(context)
                         }
