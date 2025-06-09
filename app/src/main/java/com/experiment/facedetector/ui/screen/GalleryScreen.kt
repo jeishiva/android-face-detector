@@ -41,6 +41,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.experiment.facedetector.common.LogManager
 import com.experiment.facedetector.domain.entities.FaceImage
+import com.experiment.facedetector.domain.entities.UIImage
 import com.experiment.facedetector.ui.theme.AndroidFaceDetectorTheme
 import com.experiment.facedetector.ui.theme.MildGray
 import com.experiment.facedetector.viewmodel.GalleryViewModel
@@ -96,7 +97,7 @@ fun getColumnCount(): Int {
 
 @Composable
 fun CameraImageGrid(
-    imagesFlow: Flow<PagingData<FaceImage>>,
+    imagesFlow: Flow<PagingData<UIImage>>,
     imageLoader: ImageLoader,
     modifier: Modifier = Modifier,
     columns: Int,
@@ -123,7 +124,7 @@ fun CameraImageGrid(
 private fun LoadStateContent(
     refreshState: LoadState,
     appendState: LoadState,
-    lazyPagingItems: LazyPagingItems<FaceImage>,
+    lazyPagingItems: LazyPagingItems<UIImage>,
     imageLoader: ImageLoader,
     columns: Int,
     spacing: Dp
@@ -179,7 +180,7 @@ private fun ErrorMessage(
 
 @Composable
 private fun ImageGridContent(
-    lazyPagingItems: LazyPagingItems<FaceImage>,
+    lazyPagingItems: LazyPagingItems<UIImage>,
     imageLoader: ImageLoader,
     columns: Int,
     spacing: Dp,
@@ -257,26 +258,26 @@ private fun LazyGridScope.appendStateContent(appendState: LoadState) {
 
 @Composable
 fun UserImageItem(
-    image: FaceImage,
+    image: UIImage,
     size: Dp,
     imageLoader: ImageLoader,
     modifier: Modifier = Modifier
 ) {
     AsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
-            .data(image.thumbnail)
+            .data(image.file)
             .crossfade(true)
             .error(android.R.drawable.stat_notify_error)
             .listener(
                 onError = { _, result ->
-                    LogManager.e("UserImageItem", "Failed to load image ${image.userImage.mediaId}", result.throwable)
+                    LogManager.e("UserImageItem", "Failed to load image ${image.mediaId}", result.throwable)
                 },
                 onSuccess = { _, _ ->
-                    LogManager.d("UserImageItem", "Loaded image ${image.userImage.mediaId}")
+                    LogManager.d("UserImageItem", "Loaded image ${image.mediaId}")
                 }
             )
             .build(),
-        contentDescription = "Image with ID ${image.userImage.mediaId} from camera",
+        contentDescription = "Image with ID ${image.mediaId} from camera",
         modifier = modifier
             .size(size)
             .clip(RoundedCornerShape(8.dp)),

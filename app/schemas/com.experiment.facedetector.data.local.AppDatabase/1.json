@@ -2,16 +2,16 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "db6ef37f70799477a992713831fa052e",
+    "identityHash": "6983337fd780597a2168e08a14e8e344",
     "entities": [
       {
         "tableName": "media",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`mediaId` TEXT NOT NULL, `contentUri` TEXT NOT NULL, `thumbnailUri` TEXT NOT NULL, PRIMARY KEY(`mediaId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`mediaId` INTEGER NOT NULL, `contentUri` TEXT NOT NULL, `thumbnailUri` TEXT NOT NULL, PRIMARY KEY(`mediaId`))",
         "fields": [
           {
             "fieldPath": "mediaId",
             "columnName": "mediaId",
-            "affinity": "TEXT",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
@@ -118,7 +118,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'db6ef37f70799477a992713831fa052e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6983337fd780597a2168e08a14e8e344')"
     ]
   }
 }

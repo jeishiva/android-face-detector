@@ -1,60 +1,43 @@
-package com.experiment.facedetector.data.local
+package com.experiment.facedetector.data.local.worker
+
+import com.experiment.facedetector.domain.entities.FaceImage
+
 
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
 import android.os.Bundle
 import android.provider.MediaStore
-import androidx.paging.PagingSource
-import androidx.paging.PagingState
 import com.experiment.facedetector.common.LogManager
 import com.experiment.facedetector.core.FaceDetectionProcessor
-import com.experiment.facedetector.domain.entities.FaceImage
 import com.experiment.facedetector.domain.entities.UserImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class LocalCameraPagingSource(
+class CameraImageProcessor(
     private val context: Context,
-    private val pageSize: Int,
+    private val pageSize: Int = 50,
     private val faceDetectionProcessor: FaceDetectionProcessor,
-) : PagingSource<Int, FaceImage>() {
+    private val saveCallback: suspend (faceImage: FaceImage) -> Unit,
+) {
 
-    override fun getRefreshKey(state: PagingState<Int, FaceImage>): Int? {
-        val anchorPosition = state.anchorPosition ?: return null
-        val closestPage = state.closestPageToPosition(anchorPosition) ?: return null
-        return closestPage.prevKey?.plus(1) ?: closestPage.nextKey?.minus(1)
-    }
-
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, FaceImage> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val page = params.key ?: 0
-                val offset = page * pageSize
-                val rawImages = queryCameraImages(limit = pageSize, offset = offset)
-                val resultImages = mutableListOf<FaceImage>()
-                for (image in rawImages) {
-                    try {
-                        val processed = faceDetectionProcessor.processImage(image)
-                        resultImages.add(processed)
-                    } catch (ignored: Exception) {
-                        ignored.printStackTrace()
-                        LogManager.e(message = "image skipped ${image.contentUri}")
-                    }
+    suspend fun processAllImages() = withContext(Dispatchers.IO) {
+        var page = 0
+        while (true) {
+            val images = queryCameraImages(pageSize, page * pageSize)
+            if (images.isEmpty()) break
+            for (image in images) {
+                try {
+                    val faceImage = faceDetectionProcessor.processImage(image)
+                    saveCallback(faceImage)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    LogManager.e(message = "Failed processing image ${image.contentUri}: ${e.message}")
                 }
-
-                LoadResult.Page(
-                    data = resultImages,
-                    prevKey = if (page == 0) null else page - 1,
-                    nextKey = if (rawImages.isEmpty()) null else page + 1
-                )
-            } catch (e: Exception) {
-                LoadResult.Error(e)
             }
+            page++
         }
     }
-
-
 
     private fun queryCameraImages(limit: Int, offset: Int): List<UserImage> {
         val images = mutableListOf<UserImage>()
@@ -88,9 +71,6 @@ class LocalCameraPagingSource(
                 LogManager.d(message = "Camera Image: ID=$id, Path=$contentUri")
             }
         }
-
         return images
     }
-
-
 }

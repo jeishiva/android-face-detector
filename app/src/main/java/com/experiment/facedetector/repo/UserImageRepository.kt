@@ -4,22 +4,19 @@ import android.content.Context
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import com.experiment.facedetector.core.FaceDetectionProcessor
-import com.experiment.facedetector.data.local.LocalCameraPagingSource
-import com.experiment.facedetector.domain.entities.FaceImage
+import com.experiment.facedetector.data.local.dao.MediaDao
+import com.experiment.facedetector.data.local.source.LocalCameraPagingSource
+import com.experiment.facedetector.domain.entities.UIImage
 import kotlinx.coroutines.flow.Flow
 
 class UserImageRepository(
-    private val context: Context, private val faceDetectionProcessor: FaceDetectionProcessor
+    private val context: Context,
+    private val mediaDao: MediaDao,
 ) {
-    fun getUserImageStream(pageSize: Int): Flow<PagingData<FaceImage>> {
+    fun getUserImageStream(pageSize: Int): Flow<PagingData<UIImage>> {
         return Pager(
             config = PagingConfig(pageSize = pageSize), pagingSourceFactory = {
-                LocalCameraPagingSource(
-                    context,
-                    pageSize,
-                    faceDetectionProcessor
-                )
+                LocalCameraPagingSource(mediaDao)
             }).flow
     }
 }

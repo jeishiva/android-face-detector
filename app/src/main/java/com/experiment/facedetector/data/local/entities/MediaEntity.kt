@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "media")
 data class MediaEntity(
-    @PrimaryKey val mediaId: String,
+    @PrimaryKey val mediaId: Long,
     val contentUri: String,
     val thumbnailUri: String
 )
