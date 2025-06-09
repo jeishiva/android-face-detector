@@ -19,7 +19,9 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun FullImageScreen(faceImage: FaceImage) {
+
     val viewModel: FullImageViewModel = koinViewModel()
+
     AndroidFaceDetectorTheme {
         Scaffold(
             containerColor = Color.Transparent,

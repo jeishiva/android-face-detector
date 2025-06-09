@@ -3,6 +3,7 @@ package com.experiment.facedetector.domain.entities
 import android.graphics.Bitmap
 import android.net.Uri
 import com.google.mlkit.vision.face.Face
+import kotlinx.serialization.Serializable
 import java.io.File
 
 data class UserImage(

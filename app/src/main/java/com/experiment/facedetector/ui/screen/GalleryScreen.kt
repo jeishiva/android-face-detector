@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
@@ -44,7 +45,6 @@ import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.experiment.facedetector.common.LogManager
-import com.experiment.facedetector.domain.entities.FaceImage
 import com.experiment.facedetector.domain.entities.UIImage
 import com.experiment.facedetector.ui.theme.AndroidFaceDetectorTheme
 import com.experiment.facedetector.ui.theme.MildGray
@@ -55,7 +55,7 @@ import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GalleryScreen() {
+fun GalleryScreen(navController: NavHostController) {
     val viewModel: GalleryViewModel = koinViewModel()
     val imageLoader: ImageLoader = koinInject()
     LogManager.d(message = "rendering gallery screen")

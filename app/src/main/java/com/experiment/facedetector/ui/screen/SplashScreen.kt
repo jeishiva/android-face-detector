@@ -31,14 +31,12 @@ import com.experiment.facedetector.R
 import com.experiment.facedetector.common.RequestPermission
 import com.experiment.facedetector.ui.theme.AndroidFaceDetectorTheme
 import android.provider.Settings
-import androidx.compose.runtime.saveable.rememberSaveable
-import com.experiment.facedetector.common.LogManager
-import com.experiment.facedetector.viewmodel.GalleryViewModel
+import androidx.navigation.NavHostController
 import com.experiment.facedetector.viewmodel.SplashViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun SplashScreen(onComplete: () -> Unit) {
+fun SplashScreen(navController: NavHostController) {
     var showPermissionRequest by remember { mutableStateOf(false) }
     var permissionGranted by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -64,7 +62,7 @@ fun SplashScreen(onComplete: () -> Unit) {
                     onPermissionResult = { granted ->
                         permissionGranted = granted
                         if (granted) {
-                            onComplete()
+                            navController.navigate("gallery")
                         } else {
                             openAppSettingsWithToast(context)
                         }

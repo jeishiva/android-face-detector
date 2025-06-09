@@ -77,4 +77,5 @@ dependencies {
     kapt(libs.room.compiler)
     implementation(libs.koin.workmanager)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.navigation.compose)
 }
