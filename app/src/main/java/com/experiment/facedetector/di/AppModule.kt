@@ -1,12 +1,14 @@
 package com.experiment.facedetector.di
 
 import android.content.Context
+import androidx.lifecycle.SavedStateHandle
 import androidx.work.WorkManager
 import coil.ImageLoader
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import com.experiment.facedetector.core.FaceDetectionProcessor
 import com.experiment.facedetector.data.local.worker.CameraImageWorker
+import com.experiment.facedetector.repo.MediaRepo
 import com.experiment.facedetector.repo.UserImageRepository
 import com.experiment.facedetector.viewmodel.FullImageViewModel
 import com.experiment.facedetector.viewmodel.GalleryViewModel
@@ -24,6 +26,9 @@ import java.util.concurrent.TimeUnit
 val appModule = module {
     single {
         UserImageRepository(get(), get())
+    }
+    single {
+        MediaRepo(get(), get())
     }
     single {
        provideImageLoader(context = get(), okHttpClient = get())
@@ -53,7 +58,9 @@ val appModule = module {
     }
     viewModel { GalleryViewModel(get(), get(), get()) }
     viewModel { SplashViewModel() }
-    viewModel { FullImageViewModel() }
+    viewModel { (handle: SavedStateHandle) ->
+        FullImageViewModel(get(), handle)
+    }
     worker {
         CameraImageWorker(get(), get(), get(), get(), get())
     }

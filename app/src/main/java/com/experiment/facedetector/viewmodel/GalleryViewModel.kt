@@ -47,6 +47,8 @@ class GalleryViewModel(
         workManager.enqueue(workRequest)
     }
 
+    
+
     companion object {
         const val PAGE_SIZE = 10
         const val INITIAL_LOAD_SIZE = 10

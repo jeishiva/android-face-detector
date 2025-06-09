@@ -20,6 +20,9 @@ interface MediaDao {
     @Query("SELECT * FROM media ORDER BY mediaId DESC")
     fun getPagedMedia2(): PagingSource<Int, MediaEntity>
 
+    @Query("SELECT * FROM media WHERE mediaId = :id")
+    suspend fun getMediaEntityById(id: Long): MediaEntity
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMedia(media: MediaEntity)
 

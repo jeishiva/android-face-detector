@@ -1,6 +1,7 @@
 package com.experiment.facedetector.ui.screen
 
 import android.content.res.Configuration
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -36,7 +37,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
@@ -55,7 +55,7 @@ import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GalleryScreen(navController: NavHostController) {
+fun GalleryScreen(onItemClick: (Long) -> Unit) {
     val viewModel: GalleryViewModel = koinViewModel()
     val imageLoader: ImageLoader = koinInject()
     LogManager.d(message = "rendering gallery screen")
@@ -68,16 +68,12 @@ fun GalleryScreen(navController: NavHostController) {
     AndroidFaceDetectorTheme {
         Scaffold(
             topBar = {
-                TopAppBar(
-                    title = { Text("Gallery") },
-                    navigationIcon = {
-                        IconButton(onClick = { }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                        }
+                TopAppBar(title = { Text("Gallery") }, navigationIcon = {
+                    IconButton(onClick = { }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
-                )
-            },
-            containerColor = Color.Transparent, modifier = Modifier.fillMaxSize()
+                })
+            }, containerColor = Color.Transparent, modifier = Modifier.fillMaxSize()
         ) { innerPadding ->
             Box(
                 modifier = Modifier
@@ -89,7 +85,8 @@ fun GalleryScreen(navController: NavHostController) {
                     imagesFlow = viewModel.userImageFlow,
                     columns = getColumnCount(),
                     spacing = 8.dp,
-                    imageLoader = imageLoader
+                    imageLoader = imageLoader,
+                    onItemClick = onItemClick // Pass this down
                 )
             }
         }
@@ -112,12 +109,12 @@ fun CameraImageGrid(
     modifier: Modifier = Modifier,
     columns: Int,
     spacing: Dp,
+    onItemClick: (Long) -> Unit // <- Add this
 ) {
     val lazyPagingItems = imagesFlow.collectAsLazyPagingItems()
     LogManager.d("CameraImageGrid", "Item count: ${lazyPagingItems.itemCount}")
     Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center
     ) {
         LoadStateContent(
             refreshState = lazyPagingItems.loadState.refresh,
@@ -125,7 +122,8 @@ fun CameraImageGrid(
             lazyPagingItems = lazyPagingItems,
             imageLoader = imageLoader,
             columns = columns,
-            spacing = spacing
+            spacing = spacing,
+            onItemClick = onItemClick // <- Pass down
         )
     }
 }
@@ -137,7 +135,8 @@ private fun LoadStateContent(
     lazyPagingItems: LazyPagingItems<UIImage>,
     imageLoader: ImageLoader,
     columns: Int,
-    spacing: Dp
+    spacing: Dp,
+    onItemClick: (Long) -> Unit
 ) {
     when {
         refreshState is LoadState.Loading && lazyPagingItems.itemCount == 0 -> {
@@ -157,7 +156,8 @@ private fun LoadStateContent(
                 imageLoader = imageLoader,
                 columns = columns,
                 spacing = spacing,
-                appendState = appendState
+                appendState = appendState,
+                onItemClick
             )
         }
     }
@@ -178,8 +178,7 @@ private fun LoadingIndicator(
 // Displays an error message
 @Composable
 private fun ErrorMessage(
-    error: Throwable,
-    modifier: Modifier = Modifier
+    error: Throwable, modifier: Modifier = Modifier
 ) {
     Text(
         text = "Error loading images: ${error.message}",
@@ -197,7 +196,8 @@ private fun ImageGridContent(
     imageLoader: ImageLoader,
     columns: Int,
     spacing: Dp,
-    appendState: LoadState
+    appendState: LoadState,
+    onItemClick: (Long) -> Unit
 ) {
     val imageSize = calculateImageSize(columns, spacing)
     LazyVerticalGrid(
@@ -213,7 +213,7 @@ private fun ImageGridContent(
         ) { index ->
             val image = lazyPagingItems[index]
             if (image != null) {
-                UserImageItem(image, imageSize, imageLoader)
+                UserImageItem(image, imageSize, imageLoader, onClick = onItemClick)
             }
         }
         appendStateContent(appendState)
@@ -279,32 +279,26 @@ fun UserImageItem(
     image: UIImage,
     size: Dp,
     imageLoader: ImageLoader,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: (Long) -> Unit = {}
 ) {
     AsyncImage(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(image.file)
-            .crossfade(true)
-            .error(android.R.drawable.stat_notify_error)
-            .listener(
-                onError = { _, result ->
-                    LogManager.e(
-                        "UserImageItem",
-                        "Failed to load image ${image.mediaId}",
-                        result.throwable
-                    )
-                },
-                onSuccess = { _, _ ->
-                    LogManager.d("UserImageItem", "Loaded image ${image.mediaId}")
-                }
-            )
-            .build(),
+        model = ImageRequest.Builder(LocalContext.current).data(image.file).crossfade(true)
+            .error(android.R.drawable.stat_notify_error).listener(onError = { _, result ->
+                LogManager.e(
+                    "UserImageItem", "Failed to load image ${image.mediaId}", result.throwable
+                )
+            }, onSuccess = { _, _ ->
+                LogManager.d("UserImageItem", "Loaded image ${image.mediaId}")
+            }).build(),
         contentDescription = "Image with ID ${image.mediaId} from camera",
         modifier = modifier
             .size(size)
-            .clip(RoundedCornerShape(8.dp)),
+            .clip(RoundedCornerShape(8.dp))
+            .clickable { onClick(image.mediaId) },
         placeholder = ColorPainter(MildGray),
         contentScale = ContentScale.Crop,
         imageLoader = imageLoader
     )
+
 }
