@@ -28,9 +28,7 @@ class CameraImageWorker(
             faceDetectionProcessor = faceDetectionProcessor,
             mediaDao = mediaDao,
             userImageRepository = userImageRepository,
-            saveCallback = { faceImage ->
-                saveFaceImageAndThumbnail(faceImage)
-            })
+        )
         return try {
             processor.processAllImages()
             Result.success()
@@ -40,27 +38,5 @@ class CameraImageWorker(
         }
     }
 
-    private suspend fun saveFaceImageAndThumbnail(faceImage: FaceImage) {
-        try {
-            LogManager.d(message = "work save face image called")
-            val file = ImageHelper.saveBitmap(
-                context,
-                faceImage.thumbnail,
-                "${AppConfig.THUMBNAIL_FILE_PREFIX}${faceImage.userImage.mediaId}",
-                Bitmap.CompressFormat.WEBP,
-                70
-            )
-            if (file != null) {
-                val media =  MediaEntity(
-                    mediaId = faceImage.userImage.mediaId,
-                    contentUri = faceImage.userImage.contentUri.toString(),
-                    thumbnailUri = file.absolutePath
-                )
-                mediaDao.insertMedia(media)
-                LogManager.d(message = "inserted $media")
-            }
-        } catch (ex: Exception) {
-           ex.printStackTrace()
-        }
-    }
+
 }

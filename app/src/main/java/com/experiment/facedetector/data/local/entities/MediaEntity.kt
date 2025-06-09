@@ -9,3 +9,4 @@ data class MediaEntity(
     val contentUri: String,
     val thumbnailUri: String
 )
+

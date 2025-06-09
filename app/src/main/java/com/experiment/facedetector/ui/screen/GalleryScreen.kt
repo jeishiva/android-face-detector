@@ -62,7 +62,7 @@ fun GalleryScreen() {
                 TopAppBar(
                     title = { Text("Gallery") },
                     navigationIcon = {
-                        IconButton(onClick = {  }) {
+                        IconButton(onClick = { }) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                         }
                     }
@@ -76,7 +76,8 @@ fun GalleryScreen() {
                     .padding(innerPadding),
                 contentAlignment = Alignment.Center,
             ) {
-                CameraImageGrid(imagesFlow = viewModel.userImageFlow,
+                CameraImageGrid(
+                    imagesFlow = viewModel.userImageFlow,
                     columns = getColumnCount(),
                     spacing = 8.dp,
                     imageLoader = imageLoader
@@ -88,7 +89,7 @@ fun GalleryScreen() {
 
 @Composable
 fun getColumnCount(): Int {
-    return if(isLandscape()) {
+    return if (isLandscape()) {
         4
     } else {
         2
@@ -129,15 +130,18 @@ private fun LoadStateContent(
     columns: Int,
     spacing: Dp
 ) {
-    when (refreshState) {
-        is LoadState.Loading -> {
+    when {
+        refreshState is LoadState.Loading && lazyPagingItems.itemCount == 0 -> {
+            // Show loading only when no items are loaded initially
             LoadingIndicator()
-            LogManager.d("CameraImageGrid", "Refresh state: Loading")
+            LogManager.d("CameraImageGrid", "Refresh state: Loading, no items")
         }
-        is LoadState.Error -> {
+
+        refreshState is LoadState.Error -> {
             ErrorMessage(error = refreshState.error)
             LogManager.e("CameraImageGrid", "Refresh error", refreshState.error)
         }
+
         else -> {
             ImageGridContent(
                 lazyPagingItems = lazyPagingItems,
@@ -196,6 +200,7 @@ private fun ImageGridContent(
     ) {
         items(
             count = lazyPagingItems.itemCount,
+            key = { index -> lazyPagingItems[index]?.mediaId ?: "placeholder-$index" } // Stable key
         ) { index ->
             val image = lazyPagingItems[index]
             if (image != null) {
@@ -239,6 +244,7 @@ private fun LazyGridScope.appendStateContent(appendState: LoadState) {
                 LogManager.d("CameraImageGrid", "Append state: Loading")
             }
         }
+
         is LoadState.Error -> {
             item {
                 Text(
@@ -252,6 +258,7 @@ private fun LazyGridScope.appendStateContent(appendState: LoadState) {
                 LogManager.e("CameraImageGrid", "Append error", appendState.error)
             }
         }
+
         else -> {
 
         }
@@ -272,7 +279,11 @@ fun UserImageItem(
             .error(android.R.drawable.stat_notify_error)
             .listener(
                 onError = { _, result ->
-                    LogManager.e("UserImageItem", "Failed to load image ${image.mediaId}", result.throwable)
+                    LogManager.e(
+                        "UserImageItem",
+                        "Failed to load image ${image.mediaId}",
+                        result.throwable
+                    )
                 },
                 onSuccess = { _, _ ->
                     LogManager.d("UserImageItem", "Loaded image ${image.mediaId}")

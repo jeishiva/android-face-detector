@@ -51,7 +51,7 @@ val appModule = module {
     single {
         FaceDetectionProcessor(get(), get())
     }
-    viewModel { GalleryViewModel(get()) }
+    viewModel { GalleryViewModel(get(), get()) }
     viewModel { SplashViewModel(get()) }
     worker {
         CameraImageWorker(get(), get(), get(), get(), get())

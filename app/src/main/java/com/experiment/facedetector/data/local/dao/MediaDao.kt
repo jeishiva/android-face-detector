@@ -7,6 +7,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.experiment.facedetector.data.local.entities.MediaEntity
+import com.experiment.facedetector.domain.entities.UIImage
 
 @Dao
 interface MediaDao {
@@ -16,8 +17,14 @@ interface MediaDao {
     @Query("SELECT * FROM media ORDER BY mediaId DESC LIMIT :limit OFFSET :offset")
     suspend fun getPagedMedia(limit: Int, offset: Int): List<MediaEntity>
 
+    @Query("SELECT * FROM media ORDER BY mediaId DESC")
+    fun getPagedMedia2(): PagingSource<Int, MediaEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMedia(media: MediaEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMediaList(mediaList: List<MediaEntity>)
 
     @Delete
     suspend fun deleteMedia(media: MediaEntity)

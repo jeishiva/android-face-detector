@@ -6,11 +6,15 @@ import com.experiment.facedetector.domain.entities.FaceImage
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.provider.MediaStore
+import com.experiment.facedetector.common.ImageHelper
 import com.experiment.facedetector.common.LogManager
+import com.experiment.facedetector.core.AppConfig
 import com.experiment.facedetector.core.FaceDetectionProcessor
 import com.experiment.facedetector.data.local.dao.MediaDao
+import com.experiment.facedetector.data.local.entities.MediaEntity
 import com.experiment.facedetector.domain.entities.UserImage
 import com.experiment.facedetector.repo.UserImageRepository
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +26,6 @@ class CameraImageProcessor(
     private val faceDetectionProcessor: FaceDetectionProcessor,
     private val mediaDao: MediaDao,
     private val userImageRepository: UserImageRepository,
-    private val saveCallback: suspend (faceImage: FaceImage) -> Unit,
 ) {
 
     suspend fun processAllImages() = withContext(Dispatchers.IO) {
@@ -32,17 +35,48 @@ class CameraImageProcessor(
             val allIds = images.map { it.mediaId }
             val existingIds = mediaDao.getExistingMediaIds(allIds)
             val missingImages = images.filterNot { it.mediaId in existingIds }
-            for (image in images) {
+            val mediaEntityList = mutableListOf<MediaEntity>()
+            for (image in missingImages) {
                 try {
                     val faceImage = faceDetectionProcessor.processImage(image)
-                    saveCallback(faceImage)
+                    saveFaceImageAndThumbnail(faceImage)?.let {
+                        mediaEntityList.add(it)
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     LogManager.e(message = "Failed processing image ${image.contentUri}: ${e.message}")
                 }
             }
+            if (mediaEntityList.isNotEmpty()) {
+                mediaDao.insertMediaList(mediaEntityList)
+            }
             page++
         }
+    }
+
+    private suspend fun saveFaceImageAndThumbnail(faceImage: FaceImage): MediaEntity? {
+        try {
+            LogManager.d(message = "work save face image called")
+            val file = ImageHelper.saveBitmap(
+                context,
+                faceImage.thumbnail,
+                "${AppConfig.THUMBNAIL_FILE_PREFIX}${faceImage.userImage.mediaId}",
+                Bitmap.CompressFormat.WEBP,
+                70
+            )
+            if (file != null) {
+                val media = MediaEntity(
+                    mediaId = faceImage.userImage.mediaId,
+                    contentUri = faceImage.userImage.contentUri.toString(),
+                    thumbnailUri = file.absolutePath
+                )
+                LogManager.d(message = "inserted $media")
+                return media
+            }
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+        return null
     }
 
     private fun queryCameraImages(limit: Int, offset: Int): List<UserImage> {

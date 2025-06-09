@@ -14,7 +14,7 @@ object ImageHelper {
         format: Bitmap.CompressFormat,
         quality: Int
     ): File? {
-        val file = File(context.cacheDir, "$filename.webp")
+        val file = getThumbnailPath(context, filename)
         try {
             FileOutputStream(file).use { out ->
                 bitmap.compress(format, quality, out)
@@ -27,6 +27,10 @@ object ImageHelper {
             e.printStackTrace()
         }
         return null
+    }
+
+    fun getThumbnailPath(context: Context, filename: String): File {
+        return File(context.cacheDir, "$filename.webp")
     }
 
 }
