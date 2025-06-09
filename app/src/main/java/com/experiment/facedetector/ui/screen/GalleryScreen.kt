@@ -21,6 +21,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,7 +59,12 @@ fun GalleryScreen() {
     val viewModel: GalleryViewModel = koinViewModel()
     val imageLoader: ImageLoader = koinInject()
     LogManager.d(message = "rendering gallery screen")
-
+    var workedStarted by rememberSaveable { mutableStateOf(false) }
+    if (workedStarted.not()) {
+        workedStarted = true
+        viewModel.startInitialWork()
+        LogManager.d(message = "start work")
+    }
     AndroidFaceDetectorTheme {
         Scaffold(
             topBar = {

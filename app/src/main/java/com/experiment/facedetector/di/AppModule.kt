@@ -1,7 +1,6 @@
 package com.experiment.facedetector.di
 
 import android.content.Context
-import androidx.room.Room
 import androidx.work.WorkManager
 import coil.ImageLoader
 import coil.disk.DiskCache
@@ -51,8 +50,8 @@ val appModule = module {
     single {
         FaceDetectionProcessor(get(), get())
     }
-    viewModel { GalleryViewModel(get(), get()) }
-    viewModel { SplashViewModel(get()) }
+    viewModel { GalleryViewModel(get(), get(), get()) }
+    viewModel { SplashViewModel() }
     worker {
         CameraImageWorker(get(), get(), get(), get(), get())
     }
