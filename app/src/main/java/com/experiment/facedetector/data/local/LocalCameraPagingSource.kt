@@ -33,7 +33,6 @@ class LocalCameraPagingSource(
                 val offset = page * pageSize
                 val rawImages = queryCameraImages(limit = pageSize, offset = offset)
                 val resultImages = mutableListOf<FaceImage>()
-
                 for (image in rawImages) {
                     try {
                         val processed = faceDetectionProcessor.processImage(image)

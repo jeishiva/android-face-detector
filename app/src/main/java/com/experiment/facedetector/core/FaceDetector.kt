@@ -25,7 +25,6 @@ class FaceDetectionProcessor(
 ) {
 
     companion object {
-        private const val THUMBNAIL_SIZE = 200
         private const val MAX_HEIGHT = 1280
         private const val MAX_WIDTH = 720
     }
@@ -43,13 +42,12 @@ class FaceDetectionProcessor(
             MAX_WIDTH, MAX_HEIGHT
         )
         val bitmap = decodeBitmap(userImage, sampleSize)
-        val thumbnail = createThumbnail(bitmap, THUMBNAIL_SIZE)
-        val rotatedThumbnail = rotateBitmapIfNeeded(thumbnail, rotationDegrees)
-        if (bitmap != rotatedThumbnail) {
+        val rotated = rotateBitmapIfNeeded(bitmap, rotationDegrees)
+        if (bitmap != rotated) {
             BitmapPool.put(bitmap)
         }
         val faces = detectFaces(bitmap)
-        FaceImage(userImage, faces, rotatedThumbnail)
+        FaceImage(userImage, faces, rotated)
     }
 
     private fun rotateBitmapIfNeeded(bitmap: Bitmap, rotationDegrees: Int): Bitmap {

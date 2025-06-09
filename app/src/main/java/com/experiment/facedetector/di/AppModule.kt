@@ -1,6 +1,7 @@
 package com.experiment.facedetector.di
 
 import android.content.Context
+import androidx.room.Room
 import coil.ImageLoader
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
