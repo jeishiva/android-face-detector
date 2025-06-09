@@ -1,5 +1,6 @@
 package com.experiment.facedetector.ui.screen
 
+import android.widget.ImageView
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -19,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.experiment.facedetector.viewmodel.FullImageViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -44,7 +46,7 @@ fun FullImageScreen() {
                 .padding(innerPadding),
             contentAlignment = Alignment.Center
         ) {
-            when (val mediaEntity = mediaState.value) {
+            when (val media = mediaState.value) {
                 null -> CircularProgressIndicator(
                     modifier = Modifier
                         .size(72.dp)
@@ -52,7 +54,18 @@ fun FullImageScreen() {
                 )
 
                 else -> {
-                    Text("Add Image ${mediaEntity.mediaId}")
+                    AndroidView(
+                        modifier = Modifier.fillMaxSize(),
+                        factory = { context ->
+                            ImageView(context).apply {
+                                scaleType = ImageView.ScaleType.FIT_CENTER
+                                setImageBitmap(media)
+                            }
+                        },
+                        update = { imageView ->
+                            imageView.setImageBitmap(media)
+                        }
+                    )
                 }
             }
         }

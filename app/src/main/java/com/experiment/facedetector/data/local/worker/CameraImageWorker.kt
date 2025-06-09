@@ -18,7 +18,8 @@ class CameraImageWorker(
     workerParams: WorkerParameters,
     private val faceDetectionProcessor: FaceDetectionProcessor,
     private val mediaDao: MediaDao,
-    private val userImageRepository: UserImageRepository
+    private val userImageRepository: UserImageRepository,
+    private val imageHelper: ImageHelper
 ) : CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result {
@@ -28,6 +29,7 @@ class CameraImageWorker(
             faceDetectionProcessor = faceDetectionProcessor,
             mediaDao = mediaDao,
             userImageRepository = userImageRepository,
+            imageHelper = imageHelper
         )
         return try {
             processor.processAllImages()

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.work.ListenableWorker
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
+import com.experiment.facedetector.common.ImageHelper
 import com.experiment.facedetector.core.FaceDetectionProcessor
 import com.experiment.facedetector.data.local.dao.MediaDao
 import com.experiment.facedetector.data.local.worker.CameraImageWorker
@@ -30,6 +31,7 @@ class KoinWorkerFactory(private val koin: Koin) : WorkerFactory() {
         val processor: FaceDetectionProcessor = koin.get()
         val mediaDao: MediaDao = koin.get()
         val repo: UserImageRepository = koin.get()
-        return CameraImageWorker(appContext, workerParameters, processor, mediaDao, repo)
+        val imageHelper: ImageHelper = koin.get()
+        return CameraImageWorker(appContext, workerParameters, processor, mediaDao, repo, imageHelper)
     }
 }

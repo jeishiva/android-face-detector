@@ -4,7 +4,9 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Matrix
+import android.graphics.Paint
 import android.graphics.Rect
 import android.net.Uri
 import androidx.exifinterface.media.ExifInterface
@@ -13,21 +15,21 @@ import androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_180
 import androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_270
 import androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_90
 import androidx.exifinterface.media.ExifInterface.TAG_ORIENTATION
+import com.google.mlkit.vision.face.Face
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import kotlin.math.max
 
-object ImageHelper {
+class ImageHelper(val context: Context) {
     fun saveBitmap(
-        context: Context,
         bitmap: Bitmap,
         filename: String,
         format: Bitmap.CompressFormat,
         quality: Int
     ): File? {
-        val file = getThumbnailPath(context, filename)
+        val file = getThumbnailPath(filename)
         try {
             FileOutputStream(file).use { out ->
                 bitmap.compress(format, quality, out)
@@ -42,12 +44,32 @@ object ImageHelper {
         return null
     }
 
-    fun getThumbnailPath(context: Context, filename: String): File {
+    fun drawFaceBoundingBoxes(
+        originalBitmap: Bitmap,
+        faces: List<Face>
+    ): Bitmap {
+        if (faces.isEmpty()) {
+            return originalBitmap
+        }
+        val mutableBitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true)
+        val canvas = Canvas(mutableBitmap)
+        val paint = Paint().apply {
+            color = Color.GREEN
+            style = Paint.Style.STROKE
+            strokeWidth = 6f
+        }
+        for (face in faces) {
+            val bounds = face.boundingBox
+            canvas.drawRect(bounds, paint)
+        }
+        return mutableBitmap
+    }
+
+    fun getThumbnailPath(filename: String): File {
         return File(context.cacheDir, "$filename.webp")
     }
 
     fun decodeBitmap(
-        context: Context,
         contentUri: Uri,
         targetHeight: Int,
         targetWidth: Int
@@ -164,6 +186,5 @@ object ImageHelper {
         }
         return inSampleSize
     }
-
 }
 
