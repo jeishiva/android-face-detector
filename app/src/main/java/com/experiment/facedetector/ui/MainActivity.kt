@@ -57,7 +57,6 @@ fun MainApp() {
     }
 }
 
-
 @Composable
 fun TestScreen() {
     AndroidFaceDetectorTheme {

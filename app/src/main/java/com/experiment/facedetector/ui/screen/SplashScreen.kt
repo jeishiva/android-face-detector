@@ -62,7 +62,11 @@ fun SplashScreen(navController: NavHostController) {
                     onPermissionResult = { granted ->
                         permissionGranted = granted
                         if (granted) {
-                            navController.navigate("gallery")
+                            navController.navigate("gallery") {
+                                popUpTo("splash") {
+                                    inclusive = true
+                                }
+                            }
                         } else {
                             openAppSettingsWithToast(context)
                         }
