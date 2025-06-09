@@ -196,9 +196,6 @@ private fun ImageGridContent(
     ) {
         items(
             count = lazyPagingItems.itemCount,
-            key = {
-                index -> lazyPagingItems[index]?.mediaId ?: index
-            }
         ) { index ->
             val image = lazyPagingItems[index]
             if (image != null) {
