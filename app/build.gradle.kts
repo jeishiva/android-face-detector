@@ -76,4 +76,5 @@ dependencies {
     implementation(libs.room.paging)
     kapt(libs.room.compiler)
     implementation(libs.koin.workmanager)
+    implementation(libs.kotlinx.serialization.json)
 }
