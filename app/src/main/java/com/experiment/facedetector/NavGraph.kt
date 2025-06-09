@@ -27,7 +27,7 @@ fun AppNavGraph(navController: NavHostController) {
             arguments = listOf(navArgument("mediaId") { type = NavType.LongType })
         ) {
             val mediaId = it.arguments?.getLong("mediaId") ?: 0L
-            FullImageScreen(mediaId = mediaId)
+            FullImageScreen()
         }
     }
 }

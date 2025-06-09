@@ -24,7 +24,7 @@ import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FullImageScreen(mediaId: Long) {
+fun FullImageScreen() {
     val viewModel: FullImageViewModel = koinViewModel()
     val mediaState = viewModel.media.collectAsState()
 

@@ -20,6 +20,8 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
+import androidx.compose.foundation.Image
+import com.experiment.facedetector.common.ImageHelper
 
 class FaceDetectionProcessor(
     private val context: Context,
@@ -32,100 +34,13 @@ class FaceDetectionProcessor(
     }
 
     suspend fun processImage(userImage: UserImage): FaceImage = withContext(Dispatchers.IO) {
-        val rotationDegrees = getImageRotation(userImage)
-        val (originalWidth, originalHeight) = getImageDimensions(userImage)
-        val (sampleWidth, sampleHeight) = when (rotationDegrees) {
-            90, 270 -> originalHeight to originalWidth
-            else -> originalWidth to originalHeight
-        }
-        val sampleSize = calculateInSampleSize(
-            sampleWidth, sampleHeight,
-            MAX_WIDTH, MAX_HEIGHT
-        )
-        val bitmap = decodeBitmap(userImage, sampleSize)
-        val rotated = rotateBitmapIfNeeded(bitmap, rotationDegrees)
-        if (bitmap != rotated) {
-            BitmapPool.put(bitmap)
-        }
-        val faces = detectFaces(rotated)
-        FaceImage(userImage, faces, rotated)
-    }
-
-
-
-    private fun rotateBitmapIfNeeded(bitmap: Bitmap, rotationDegrees: Int): Bitmap {
-        if (rotationDegrees == 0) return bitmap
-        val matrix = Matrix().apply { postRotate(rotationDegrees.toFloat()) }
-        val rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
-        return rotatedBitmap
-    }
-
-    private fun getImageRotation(userImage: UserImage): Int {
-        context.contentResolver.openInputStream(userImage.contentUri)?.use { inputStream ->
-            val exif = ExifInterface(inputStream)
-            return when (exif.getAttributeInt(TAG_ORIENTATION, ORIENTATION_UNDEFINED)) {
-                ORIENTATION_ROTATE_90 -> 90
-                ORIENTATION_ROTATE_180 -> 180
-                ORIENTATION_ROTATE_270 -> 270
-                ORIENTATION_NORMAL, ORIENTATION_UNDEFINED -> 0
-                else -> 0
-            }
-        }
-        return 0
-    }
-
-    private fun getImageDimensions(userImage: UserImage): Pair<Int, Int> {
-        val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        context.contentResolver.openInputStream(userImage.contentUri)?.use { stream ->
-            BitmapFactory.decodeStream(stream, null, options)
-        }
-        return options.outWidth to options.outHeight
-    }
-
-    private fun calculateInSampleSize(
-        width: Int,
-        height: Int,
-        reqWidth: Int,
-        reqHeight: Int
-    ): Int {
-        var inSampleSize = 1
-        if (height > reqHeight || width > reqWidth) {
-            val halfHeight = height / 2
-            val halfWidth = width / 2
-            while ((halfHeight / inSampleSize) >= reqHeight &&
-                (halfWidth / inSampleSize) >= reqWidth) {
-                inSampleSize *= 2
-            }
-        }
-        return inSampleSize
-    }
-
-    private fun decodeBitmap(userImage: UserImage, sampleSize: Int): Bitmap {
-        val options = BitmapFactory.Options().apply {
-            inSampleSize = sampleSize
-            inPreferredConfig = Bitmap.Config.ARGB_8888
-        }
-        context.contentResolver.openInputStream(userImage.contentUri)?.use { stream ->
-            return BitmapFactory.decodeStream(stream, null, options)
-                ?: throw IllegalArgumentException("Bitmap decode failed")
-        }
-        throw IllegalArgumentException("Unable to open input stream")
-    }
-
-    private fun createThumbnail(bitmap: Bitmap, maxSize: Int): Bitmap {
-        val scale = maxSize.toFloat() / max(bitmap.width, bitmap.height)
-        val width = (bitmap.width * scale).toInt()
-        val height = (bitmap.height * scale).toInt()
-        val thumbnail = BitmapPool.get(width, height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(thumbnail)
-        val src = Rect(0, 0, bitmap.width, bitmap.height)
-        val dst = Rect(0, 0, width, height)
-        canvas.drawBitmap(bitmap, src, dst, null)
-        return thumbnail
+        val bitmap = ImageHelper.decodeBitmap(context, userImage.contentUri, MAX_HEIGHT, MAX_WIDTH)
+        val faces = detectFaces(bitmap)
+        FaceImage(userImage, faces, bitmap)
     }
 
     private suspend fun detectFaces(bitmap: Bitmap): List<Face> {
-        val inputImage = InputImage.fromBitmap(bitmap, 0) // rotationDegrees = 0, per request
+        val inputImage = InputImage.fromBitmap(bitmap, 0)
         return faceDetector.process(inputImage).await()
     }
 }
