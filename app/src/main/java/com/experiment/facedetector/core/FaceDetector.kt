@@ -1,11 +1,8 @@
 package com.experiment.facedetector.core
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Canvas
 import android.graphics.Matrix
-import android.graphics.Rect
 import androidx.exifinterface.media.ExifInterface
 import androidx.exifinterface.media.ExifInterface.*
 import com.experiment.facedetector.common.BitmapPool
@@ -18,6 +15,11 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetector
 import kotlin.math.max
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Rect
 
 class FaceDetectionProcessor(
     private val context: Context,
@@ -46,8 +48,27 @@ class FaceDetectionProcessor(
         if (bitmap != rotated) {
             BitmapPool.put(bitmap)
         }
-        val faces = detectFaces(bitmap)
-        FaceImage(userImage, faces, rotated)
+        val faces = detectFaces(rotated)
+        val final = drawFaceBoundingBoxes(rotated, faces)
+        FaceImage(userImage, faces, final)
+    }
+
+    fun drawFaceBoundingBoxes(
+        originalBitmap: Bitmap,
+        faces: List<Face>
+    ): Bitmap {
+        val mutableBitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true)
+        val canvas = Canvas(mutableBitmap)
+        val paint = Paint().apply {
+            color = Color.GREEN
+            style = Paint.Style.STROKE
+            strokeWidth = 4f
+        }
+        for (face in faces) {
+            val bounds = face.boundingBox
+            canvas.drawRect(bounds, paint)
+        }
+        return mutableBitmap
     }
 
     private fun rotateBitmapIfNeeded(bitmap: Bitmap, rotationDegrees: Int): Bitmap {
