@@ -6,16 +6,40 @@ import com.experiment.facedetector.di.databaseModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext.startKoin
 import androidx.work.Configuration
+import com.experiment.facedetector.di.faceDetectorModule
+import com.experiment.facedetector.di.imageLoaderModule
+import com.experiment.facedetector.di.networkModule
+import com.experiment.facedetector.di.processorModule
+import com.experiment.facedetector.di.repositoryModule
+import com.experiment.facedetector.di.viewModelModule
 import org.koin.androidx.workmanager.koin.workManagerFactory
 
-class PhotoFinderApp() : Application(),
-    Configuration.Provider {
+class PhotoFinderApp() : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
+        init()
+    }
+
+    fun init() {
+        initKoin()
+    }
+
+    fun initKoin() {
         startKoin {
             androidContext(this@PhotoFinderApp)
             workManagerFactory()
-            modules(listOf(appModule, databaseModule))
+            modules(
+                listOf(
+                    appModule,
+                    networkModule,
+                    faceDetectorModule,
+                    imageLoaderModule,
+                    databaseModule,
+                    repositoryModule,
+                    viewModelModule,
+                    processorModule
+                )
+            )
         }
     }
 
