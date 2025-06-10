@@ -54,6 +54,7 @@ import com.experiment.facedetector.domain.entities.FaceTag
 import com.experiment.facedetector.domain.entities.FullImageWithFaces
 import com.experiment.facedetector.image.ImageCoordinateHelper
 import com.experiment.facedetector.ui.widgets.AppCircularProgressIndicator
+import com.experiment.facedetector.ui.widgets.AppFullScreenImage
 import com.experiment.facedetector.viewmodel.FullImageViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -160,7 +161,7 @@ fun FullImageWithFaceOverlay(
             )
         }
 
-        FullImage(imageBitmap)
+        AppFullScreenImage(imageBitmap)
 
         faceTags.forEach { face ->
             key(face.id) {
@@ -268,16 +269,6 @@ private fun EditableTagInput(
         ),
         keyboardActions = KeyboardActions(onDone = { onTagSubmit(tagText) }),
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done)
-    )
-}
-
-@Composable
-private fun FullImage(imageBitmap: ImageBitmap) {
-    Image(
-        bitmap = imageBitmap,
-        contentDescription = "Full Image",
-        modifier = Modifier.fillMaxSize(),
-        contentScale = ContentScale.Fit
     )
 }
 

@@ -38,6 +38,6 @@ fun AppFullScreenImage(imageBitmap: ImageBitmap, description: String? = null) {
         bitmap = imageBitmap,
         contentDescription = description,
         modifier = Modifier.fillMaxSize(),
-        contentScale = ContentScale.FillBounds
+        contentScale = ContentScale.Fit
     )
 }

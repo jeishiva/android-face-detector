@@ -249,7 +249,7 @@ private fun ImageGrid(
 ) {
     val imageSize = calculateOptimalImageSize(columns, spacing)
     val debouncedAppendState by produceState(initialValue = appendState) {
-        delay(1000)
+        delay(250)
         value = appendState
     }
     LazyVerticalGrid(
