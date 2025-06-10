@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -150,8 +151,8 @@ private fun LoadStateContent(
     spacing: Dp,
     isLoadingPhotos: Boolean,
     onItemClick: (Long) -> Unit,
+) {
 
-    ) {
     if (isLoadingPhotos && lazyPagingItems.itemCount == 0) {
         AppCircularProgressIndicator()
     } else {
@@ -181,7 +182,6 @@ private fun LoadStateContent(
     }
 }
 
-// Displays an error message
 @Composable
 private fun ErrorMessage(
     error: Throwable, modifier: Modifier = Modifier
@@ -206,7 +206,17 @@ private fun ImageGridContent(
     isLoadingPhotos: Boolean,
     onItemClick: (Long) -> Unit
 ) {
-    val imageSize = calculateImageSize(columns, spacing)
+    val context = LocalContext.current
+    val densityValue = LocalDensity.current.density
+    val screenWidthPx = context.resources.displayMetrics.widthPixels
+    val imageSize = remember(screenWidthPx, columns, spacing, densityValue) {
+        calculateImageSize(
+            screenWidthPx = screenWidthPx,
+            density = densityValue,
+            columns = columns,
+            spacing = spacing
+        )
+    }
     LazyVerticalGrid(
         columns = GridCells.Fixed(columns),
         modifier = Modifier.fillMaxSize(),
@@ -233,16 +243,17 @@ fun isLandscape(): Boolean {
     return configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 }
 
-@Composable
-private fun calculateImageSize(columns: Int, spacing: Dp): Dp {
-    val context = LocalContext.current
-    val screenWidthPx = context.resources.displayMetrics.widthPixels
-    val density = LocalDensity.current
-    val spacingPx = with(density) { spacing.toPx() }
+fun calculateImageSize(
+    screenWidthPx: Int,
+    density: Float,
+    columns: Int,
+    spacing: Dp
+): Dp {
+    val spacingPx = spacing.value * density
     val totalSpacingPx = spacingPx * (columns - 1)
     val availableWidthPx = screenWidthPx - totalSpacingPx
     val imageSizePx = availableWidthPx / columns
-    return with(density) { imageSizePx.toDp() }
+    return Dp(imageSizePx / density)
 }
 
 @Composable
@@ -267,17 +278,10 @@ private fun LazyGridScope.appendStateContent(
     isLoadingPhotos: Boolean,
 ) {
     when {
-        isLoadingPhotos -> {
+        isLoadingPhotos || appendState is LoadState.Loading -> {
             item {
                 GridItemLoader()
                 LogManager.d("CameraImageGrid", "Append state: Loading from WorkManager")
-            }
-        }
-
-        appendState is LoadState.Loading -> {
-            item {
-                GridItemLoader()
-                LogManager.d("CameraImageGrid", "Append state: Paging Loading")
             }
         }
 
