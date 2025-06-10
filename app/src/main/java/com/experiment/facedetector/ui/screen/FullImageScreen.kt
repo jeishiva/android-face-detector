@@ -42,6 +42,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.experiment.facedetector.domain.entities.FaceTag
 import com.experiment.facedetector.image.ImageCoordinateHelper
 import com.experiment.facedetector.ui.widgets.AppCircularProgressIndicator
@@ -50,7 +51,7 @@ import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FullImageScreen() {
+fun FullImageScreen(navController: NavHostController) {
     val viewModel: FullImageViewModel = koinViewModel()
     val fullImageResult = viewModel.fullImageResult.collectAsState()
     var editingFaceId by remember { mutableStateOf<String?>(null) }
@@ -59,7 +60,9 @@ fun FullImageScreen() {
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("Full Image") }, navigationIcon = {
-                IconButton(onClick = {}) {
+                IconButton(onClick = {
+                    navController.popBackStack()
+                }) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
             })

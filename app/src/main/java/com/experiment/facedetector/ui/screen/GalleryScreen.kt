@@ -1,5 +1,6 @@
 package com.experiment.facedetector.ui.screen
 
+import android.app.Activity
 import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -41,6 +42,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
@@ -61,11 +63,12 @@ import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GalleryScreen(onItemClick: (Long) -> Unit) {
+fun GalleryScreen(navController: NavHostController, onItemClick: (Long) -> Unit) {
     val viewModel: GalleryViewModel = koinViewModel()
     val imageLoader: ImageLoader = koinInject()
     val workInfos by viewModel.workInfoStateFlow.collectAsState()
     val isLoadingPhotos = workInfos.any { it.state == WorkInfo.State.RUNNING }
+    val activity = LocalContext.current as? Activity
 
     LogManager.d(message = "rendering gallery screen")
     var workedStarted by rememberSaveable { mutableStateOf(false) }
@@ -78,7 +81,9 @@ fun GalleryScreen(onItemClick: (Long) -> Unit) {
         Scaffold(
             topBar = {
                 TopAppBar(title = { Text("Gallery") }, navigationIcon = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = {
+                        activity?.finish()
+                    }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 })

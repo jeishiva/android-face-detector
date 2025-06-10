@@ -7,7 +7,6 @@ import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Rect
 import android.os.Bundle
 import android.provider.MediaStore
 import com.experiment.facedetector.common.BitmapPool
@@ -22,9 +21,6 @@ import com.experiment.facedetector.repo.UserImageRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.core.graphics.scale
-import com.google.mlkit.vision.face.Face
-import kotlin.math.max
-import kotlin.math.min
 
 class CameraImageProcessor(
     private val context: Context,
@@ -70,15 +66,6 @@ class CameraImageProcessor(
             }
             page++
         }
-    }
-
-    private fun Rect.unionWith(other: Rect): Rect {
-        return Rect(
-            min(this.left, other.left),
-            min(this.top, other.top),
-            max(this.right, other.right),
-            max(this.bottom, other.bottom)
-        )
     }
 
     private suspend fun saveFaceImageAndThumbnail(faceImage: FaceImage): MediaEntity? {

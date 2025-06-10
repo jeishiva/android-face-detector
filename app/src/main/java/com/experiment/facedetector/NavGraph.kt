@@ -18,6 +18,7 @@ fun AppNavGraph(navController: NavHostController) {
         }
         composable("gallery") {
             GalleryScreen(
+                navController,
                 onItemClick = { mediaId ->
                     navController.navigate("fullImage/$mediaId")
                 })
@@ -26,7 +27,7 @@ fun AppNavGraph(navController: NavHostController) {
             route = "fullImage/{mediaId}",
             arguments = listOf(navArgument("mediaId") { type = NavType.LongType })
         ) {
-            FullImageScreen()
+            FullImageScreen(navController)
         }
     }
 }
