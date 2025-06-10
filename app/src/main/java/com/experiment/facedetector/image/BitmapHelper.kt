@@ -7,7 +7,6 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
-import android.graphics.Rect
 import android.net.Uri
 import androidx.exifinterface.media.ExifInterface
 import com.google.mlkit.vision.face.Face
@@ -15,14 +14,12 @@ import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import kotlin.math.max
+import androidx.core.graphics.scale
+import com.experiment.facedetector.common.LogManager
 
 class BitmapHelper(val context: Context) {
     fun saveBitmap(
-        bitmap: Bitmap,
-        filename: String,
-        format: Bitmap.CompressFormat,
-        quality: Int
+        bitmap: Bitmap, filename: String, format: Bitmap.CompressFormat, quality: Int
     ): File? {
         val file = getThumbnailPath(filename)
         try {
@@ -40,8 +37,7 @@ class BitmapHelper(val context: Context) {
     }
 
     fun drawFaceBoundingBoxes(
-        originalBitmap: Bitmap,
-        faces: List<Face>
+        originalBitmap: Bitmap, faces: List<Face>
     ): Bitmap {
         if (faces.isEmpty()) {
             return originalBitmap
@@ -64,10 +60,12 @@ class BitmapHelper(val context: Context) {
         return File(context.cacheDir, "$filename.webp")
     }
 
+    private fun canUseForInBitmap(bitmap: Bitmap, width: Int, height: Int): Boolean {
+        return bitmap.width == width && bitmap.height == height && !bitmap.isRecycled && bitmap.isMutable
+    }
+
     fun decodeBitmap(
-        contentUri: Uri,
-        targetHeight: Int,
-        targetWidth: Int
+        contentUri: Uri, targetHeight: Int, targetWidth: Int
     ): Bitmap {
         context.contentResolver.openInputStream(contentUri)?.let { inputStream ->
             BufferedInputStream(inputStream, 8192).use { bufferedStream ->
@@ -82,20 +80,28 @@ class BitmapHelper(val context: Context) {
                 } else {
                     originalWidth to originalHeight
                 }
-                //  Calculate inSampleSize
-                val sampleSize = calculateInSampleSize(adjustedWidth, adjustedHeight, targetWidth, targetHeight)
 
+                // get from pool
+                val sampleSize =
+                    calculateInSampleSize(adjustedWidth, adjustedHeight, targetWidth, targetHeight)
+                val finalWidth = adjustedWidth / sampleSize
+                val finalHeight = adjustedHeight / sampleSize
+                val pooledBitmap = BitmapPool.get(finalWidth, finalHeight, Bitmap.Config.ARGB_8888)
                 // Decode bitmap
                 val options = BitmapFactory.Options().apply {
                     inSampleSize = sampleSize
                     inPreferredConfig = Bitmap.Config.ARGB_8888
+                    if (canUseForInBitmap(pooledBitmap, finalWidth, finalHeight)) {
+                        inBitmap = pooledBitmap
+                        inMutable = true
+                    }
                 }
+
                 // Reset stream to start for decoding
                 bufferedStream.reset()
                 val decodedBitmap = BitmapFactory.decodeStream(bufferedStream, null, options)
                     ?: throw IllegalArgumentException("Failed to decode bitmap from URI: $contentUri")
 
-                // Rotate if needed
                 val resultBitmap = rotateBitmapIfNeeded(decodedBitmap, rotationDegrees)
                 if (resultBitmap != decodedBitmap) {
                     BitmapPool.put(decodedBitmap)
@@ -116,8 +122,7 @@ class BitmapHelper(val context: Context) {
         return try {
             val exif = ExifInterface(inputStream)
             when (exif.getAttributeInt(
-                ExifInterface.TAG_ORIENTATION,
-                ExifInterface.ORIENTATION_NORMAL
+                ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL
             )) {
                 ExifInterface.ORIENTATION_ROTATE_90 -> 90
                 ExifInterface.ORIENTATION_ROTATE_180 -> 180
@@ -129,15 +134,11 @@ class BitmapHelper(val context: Context) {
         }
     }
 
-    /**
-     * Retrieves image dimensions without decoding the full bitmap.
-     *
-     * @param inputStream The buffered input stream (must support mark/reset).
-     * @return A pair of (width, height) in pixels.
-     */
     private fun getImageDimensions(inputStream: BufferedInputStream): Pair<Int, Int> {
         inputStream.mark(Int.MAX_VALUE)
-        val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        val options = BitmapFactory.Options().apply {
+            inJustDecodeBounds = true
+        }
         BitmapFactory.decodeStream(inputStream, null, options)
         inputStream.reset()
         return options.outWidth to options.outHeight
@@ -146,25 +147,48 @@ class BitmapHelper(val context: Context) {
     private fun rotateBitmapIfNeeded(bitmap: Bitmap, rotationDegrees: Int): Bitmap {
         if (rotationDegrees == 0) return bitmap
         val matrix = Matrix().apply { postRotate(rotationDegrees.toFloat()) }
-        val rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+        val rotatedBitmap =
+            Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
         return rotatedBitmap
     }
 
     private fun calculateInSampleSize(
-        width: Int,
-        height: Int,
-        reqWidth: Int,
-        reqHeight: Int
+        width: Int, height: Int, reqWidth: Int, reqHeight: Int
     ): Int {
         var inSampleSize = 1
         if (height > reqHeight || width > reqWidth) {
             val halfHeight = height / 2
             val halfWidth = width / 2
-            while ((halfHeight / inSampleSize) >= reqHeight &&
-                (halfWidth / inSampleSize) >= reqWidth) {
+            while ((halfHeight / inSampleSize) >= reqHeight && (halfWidth / inSampleSize) >= reqWidth) {
                 inSampleSize *= 2
             }
         }
         return inSampleSize
+    }
+
+    fun scaleFromPool(source : Bitmap, targetWidth: Int, targetHeight: Int): Bitmap {
+        return try {
+            // Try to get bitmap from pool first
+            val pooledBitmap = BitmapPool.get(targetWidth, targetHeight, source.config ?: Bitmap.Config.ARGB_8888)
+
+            if (pooledBitmap.width == targetWidth && pooledBitmap.height == targetHeight && !pooledBitmap.isRecycled) {
+                // Use existing bitmap from pool
+                val canvas = Canvas(pooledBitmap)
+                val matrix = Matrix().apply {
+                    setScale(
+                        targetWidth.toFloat() / source.width,
+                        targetHeight.toFloat() / source.height
+                    )
+                }
+                canvas.drawBitmap(source, matrix, null)
+                pooledBitmap
+            } else {
+                // Fallback to creating new bitmap
+                source.scale(targetWidth, targetHeight)
+            }
+        } catch (e: Exception) {
+            LogManager.e("BitmapScale", "Failed to scale bitmap using pool, falling back to direct creation", e)
+            source.scale(targetWidth, targetHeight)
+        }
     }
 }

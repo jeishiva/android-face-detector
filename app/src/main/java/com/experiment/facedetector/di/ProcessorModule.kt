@@ -12,6 +12,6 @@ val processorModule = module {
     }
 
     worker {
-        CameraImageWorker(get(), get(), get(), get(), get(), get())
+        CameraImageWorker(get(), get(), get(), get(), get())
     }
 }

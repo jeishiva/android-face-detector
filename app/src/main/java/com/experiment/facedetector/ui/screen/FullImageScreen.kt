@@ -79,7 +79,7 @@ fun FullImageScreen(navController: NavHostController) {
                 null -> AppCircularProgressIndicator()
                 else -> {
                     FullImageWithFaceOverlay(
-                        bitmap = result.imageContent,
+                        bitmap = result.image,
                         faceTags = result.faces,
                         editingFaceId = editingFaceId,
                         onFaceClick = { face ->

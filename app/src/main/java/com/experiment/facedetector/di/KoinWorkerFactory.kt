@@ -32,6 +32,6 @@ class KoinWorkerFactory(private val koin: Koin) : WorkerFactory() {
         val mediaDao: MediaDao = koin.get()
         val repo: ProcessedMediaRepo = koin.get()
         val imageHelper: BitmapHelper = koin.get()
-        return CameraImageWorker(appContext, workerParameters, processor, mediaDao, repo, imageHelper)
+        return CameraImageWorker(appContext, workerParameters, processor, mediaDao, imageHelper)
     }
 }

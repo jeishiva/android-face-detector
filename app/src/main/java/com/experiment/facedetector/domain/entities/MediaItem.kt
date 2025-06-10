@@ -20,7 +20,7 @@ data class MediaItem(
 data class FaceDetectedMediaItem(
     val mediaItem: MediaItem,
     val faces: List<Face>,
-    val thumbnail: Bitmap,
+    val image: Bitmap,
 )
 
 /**
@@ -37,7 +37,7 @@ data class ProcessedMediaItem(
  */
 data class FullImageWithFaces(
     val mediaId: Long,
-    val imageContent: Bitmap,
+    val image: Bitmap,
     val faces: List<FaceTag>
 )
 

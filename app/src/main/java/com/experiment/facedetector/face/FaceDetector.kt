@@ -16,14 +16,14 @@ class FaceDetectionProcessor(
     private val faceDetector: FaceDetector,
     private val imageHelper: BitmapHelper
 ) {
-    suspend fun processImage(userImage: MediaItem): FaceDetectedMediaItem =
+    suspend fun processImage(mediaItem: MediaItem): FaceDetectedMediaItem =
         withContext(Dispatchers.IO) {
             val bitmap = imageHelper.decodeBitmap(
-                userImage.contentUri, FullImageConfig.MAX_HEIGHT,
+                mediaItem.contentUri, FullImageConfig.MAX_HEIGHT,
                 FullImageConfig.MAX_WIDTH
             )
             val faces = detectFaces(bitmap)
-            FaceDetectedMediaItem(userImage, faces, bitmap)
+            FaceDetectedMediaItem(mediaItem, faces, bitmap)
         }
 
     suspend fun detectFaces(bitmap: Bitmap): List<Face> {
