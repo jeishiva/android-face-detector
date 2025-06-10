@@ -29,6 +29,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -135,65 +136,67 @@ fun FullImageWithFaceOverlay(
         )
 
         faceTags.forEach { face ->
-            val faceLeft = face.left.toFloat()
-            val faceTop = face.top.toFloat()
-            val faceWidth = face.width.toFloat()
-            val faceHeight = face.height.toFloat()
+            key(face.id) {
+                val faceLeft = face.left.toFloat()
+                val faceTop = face.top.toFloat()
+                val faceWidth = face.width.toFloat()
+                val faceHeight = face.height.toFloat()
 
-            val (left, top) = coordinateHelper.imageToContainerCoords(faceLeft, faceTop)
-            val width = coordinateHelper.scaleWidth(faceWidth)
-            val height = coordinateHelper.scaleHeight(faceHeight)
-            Column(
-                modifier = Modifier.absoluteOffset(
-                    x = with(density) { left.toDp() },
-                    y = with(density) { top.toDp() }),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(
-                            width = with(density) { width.toDp() },
-                            height = with(density) { height.toDp() })
-                        .border(2.dp, Color.Green)
-                        .clickable {
-                            onFaceClick(face)
-                        }) {
-                    if (editingFaceId == face.id) {
-                        var tagText by remember { mutableStateOf(face.tag) }
-                        TextField(
-                            value = tagText,
-                            onValueChange = { tagText = it },
-                            singleLine = true,
+                val (left, top) = coordinateHelper.imageToContainerCoords(faceLeft, faceTop)
+                val width = coordinateHelper.scaleWidth(faceWidth)
+                val height = coordinateHelper.scaleHeight(faceHeight)
+
+                Column(
+                    modifier = Modifier.absoluteOffset(
+                        x = with(density) { left.toDp() },
+                        y = with(density) { top.toDp() }),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(
+                                width = with(density) { width.toDp() },
+                                height = with(density) { height.toDp() })
+                            .border(2.dp, Color.Green)
+                            .clickable {
+                                onFaceClick(face)
+                            }) {
+                        if (editingFaceId == face.id) {
+                            var tagText by remember { mutableStateOf(face.tag) }
+                            TextField(
+                                value = tagText,
+                                onValueChange = { tagText = it },
+                                singleLine = true,
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(2.dp),
+                                textStyle = MaterialTheme.typography.labelMedium,
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color(0x80000000),
+                                    unfocusedContainerColor = Color(0x80000000),
+                                    focusedTextColor = Color.White,
+                                    unfocusedTextColor = Color.White,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent
+                                ),
+                                keyboardActions = KeyboardActions(onDone = {
+                                    onTagChanged(face, tagText)
+                                }),
+                                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done)
+                            )
+                        }
+                    }
+                    if (face.tag.isNotEmpty()) {
+                        Text(
+                            text = face.tag,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
                             modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(2.dp),
-                            textStyle = MaterialTheme.typography.labelMedium,
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color(0x80000000),
-                                unfocusedContainerColor = Color(0x80000000),
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent
-                            ),
-                            keyboardActions = KeyboardActions(onDone = {
-                                onTagChanged(face, tagText)
-                            }),
-                            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done)
+                                .background(Color(0x80000000), shape = RoundedCornerShape(8.dp))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
                         )
                     }
-
-                }
-                if (face.tag.isNotEmpty()) {
-                    Text(
-                        text = face.tag,
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        modifier = Modifier
-                            .background(Color(0x80000000), shape = RoundedCornerShape(8.dp))
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                    )
                 }
             }
         }

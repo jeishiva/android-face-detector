@@ -14,6 +14,7 @@ import com.experiment.facedetector.repo.MediaRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class FullImageViewModel(
@@ -56,25 +57,28 @@ class FullImageViewModel(
         }
     }
 
-    fun saveFaceTag(mediaId: Long, faceTag: FaceTag, tag: String) {
+    fun saveFaceTag(mediaId: Long, faceTag: FaceTag, newTag: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val faceEntity = faceTag.savedFaceEntity?.let {
-                FaceEntity(
-                    id = it.id,
+            val updatedFaceEntity = faceTag.savedFaceEntity?.copy(tag = newTag)
+                ?: FaceEntity(
                     mediaId = mediaId,
                     faceId = faceTag.id,
-                    tag = tag
+                    tag = newTag
                 )
-            } ?: run {
-                FaceEntity(
-                    mediaId = mediaId,
-                    faceId = faceTag.id,
-                    tag = tag
+            mediaRepo.faceDao.insertOrUpdateFace(updatedFaceEntity)
+            _fullImageResult.update { current ->
+                current?.copy(
+                    faces = current.faces.map {
+                        if (it.id == faceTag.id) {
+                            it.copy(tag = newTag, savedFaceEntity = updatedFaceEntity)
+                        } else it
+                    }
                 )
             }
-            mediaRepo.faceDao.insertOrUpdateFace(faceEntity)
         }
     }
+
+
 }
 
 

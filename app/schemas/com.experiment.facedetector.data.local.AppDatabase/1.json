@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "6983337fd780597a2168e08a14e8e344",
+    "identityHash": "892464cf50ff4e6e568b66626aa25330",
     "entities": [
       {
         "tableName": "media",
@@ -38,7 +38,7 @@
       },
       {
         "tableName": "faces",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `mediaId` TEXT NOT NULL, `left` REAL NOT NULL, `top` REAL NOT NULL, `right` REAL NOT NULL, `bottom` REAL NOT NULL, `tag` TEXT NOT NULL, FOREIGN KEY(`mediaId`) REFERENCES `media`(`mediaId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `mediaId` INTEGER NOT NULL, `faceId` TEXT NOT NULL, `tag` TEXT NOT NULL, FOREIGN KEY(`mediaId`) REFERENCES `media`(`mediaId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -49,31 +49,13 @@
           {
             "fieldPath": "mediaId",
             "columnName": "mediaId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "faceId",
+            "columnName": "faceId",
             "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "left",
-            "columnName": "left",
-            "affinity": "REAL",
-            "notNull": true
-          },
-          {
-            "fieldPath": "top",
-            "columnName": "top",
-            "affinity": "REAL",
-            "notNull": true
-          },
-          {
-            "fieldPath": "right",
-            "columnName": "right",
-            "affinity": "REAL",
-            "notNull": true
-          },
-          {
-            "fieldPath": "bottom",
-            "columnName": "bottom",
-            "affinity": "REAL",
             "notNull": true
           },
           {
@@ -118,7 +100,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6983337fd780597a2168e08a14e8e344')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '892464cf50ff4e6e568b66626aa25330')"
     ]
   }
 }
