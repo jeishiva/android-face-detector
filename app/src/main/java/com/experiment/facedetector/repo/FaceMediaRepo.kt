@@ -9,7 +9,7 @@ import com.experiment.facedetector.data.local.source.LocalCameraPagingSource
 import com.experiment.facedetector.domain.entities.FaceMediaGridItem
 import kotlinx.coroutines.flow.Flow
 
-class UserImageRepo(
+class FaceMediaRepo(
     private val context: Context,
     private val mediaDao: MediaDao,
 ) {

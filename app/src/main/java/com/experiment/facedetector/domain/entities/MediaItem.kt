@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import android.net.Uri
 import com.experiment.facedetector.data.local.entities.FaceEntity
 import com.google.mlkit.vision.face.Face
-import kotlinx.serialization.Serializable
 import java.io.File
 
 data class MediaItem(

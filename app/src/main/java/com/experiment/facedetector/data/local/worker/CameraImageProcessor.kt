@@ -12,11 +12,11 @@ import com.experiment.facedetector.image.BitmapPool
 import com.experiment.facedetector.image.BitmapHelper
 import com.experiment.facedetector.common.LogManager
 import com.experiment.facedetector.common.toFileName
-import com.experiment.facedetector.core.FaceDetectionProcessor
+import com.experiment.facedetector.face.FaceDetectionProcessor
 import com.experiment.facedetector.data.local.dao.MediaDao
 import com.experiment.facedetector.data.local.entities.MediaEntity
 import com.experiment.facedetector.domain.entities.MediaItem
-import com.experiment.facedetector.repo.UserImageRepo
+import com.experiment.facedetector.repo.FaceMediaRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.core.graphics.scale
@@ -29,7 +29,7 @@ class CameraImageProcessor(
     private val faceDetectionProcessor: FaceDetectionProcessor,
     private val mediaDao: MediaDao,
     private val imageHelper: BitmapHelper,
-    private val userImageRepository: UserImageRepo,
+    private val userImageRepository: FaceMediaRepo,
 ) {
 
     suspend fun processAllImages() = withContext(Dispatchers.IO) {

@@ -1,4 +1,4 @@
-package com.experiment.facedetector.core
+package com.experiment.facedetector.face
 
 import com.experiment.facedetector.common.await
 import com.experiment.facedetector.domain.entities.MediaItem

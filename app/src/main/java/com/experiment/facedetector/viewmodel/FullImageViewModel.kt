@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.experiment.facedetector.image.BitmapHelper
 import com.experiment.facedetector.common.toFaceId
-import com.experiment.facedetector.core.FaceDetectionProcessor
+import com.experiment.facedetector.face.FaceDetectionProcessor
 import com.experiment.facedetector.data.local.entities.FaceEntity
 import com.experiment.facedetector.domain.entities.FaceTag
 import com.experiment.facedetector.domain.entities.FaceImageResult

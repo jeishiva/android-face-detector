@@ -1,6 +1,6 @@
 package com.experiment.facedetector.di
 
-import com.experiment.facedetector.core.FaceDetectionProcessor
+import com.experiment.facedetector.face.FaceDetectionProcessor
 import com.experiment.facedetector.data.local.worker.CameraImageWorker
 import org.koin.androidx.workmanager.dsl.worker
 import org.koin.dsl.module
