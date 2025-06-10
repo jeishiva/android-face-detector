@@ -17,7 +17,7 @@ import com.experiment.facedetector.data.local.dao.MediaDao
 import com.experiment.facedetector.data.local.entities.MediaEntity
 import com.experiment.facedetector.data.local.worker.CameraImageWorker
 import com.experiment.facedetector.domain.entities.ProcessedMediaItem
-import com.experiment.facedetector.repo.FaceMediaRepo
+import com.experiment.facedetector.repo.ProcessedMediaRepo
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.map
 import java.io.File
 
 class GalleryViewModel(
-    private val repository: FaceMediaRepo,
+    private val repository: ProcessedMediaRepo,
     private val mediaDao: MediaDao,
     private val workManager: WorkManager
 ) : ViewModel() {
@@ -54,7 +54,7 @@ class GalleryViewModel(
             .addTag("camera_image_work")
             .build()
         workManager.enqueueUniqueWork(
-            "camera_image_work",
+            CAMERA,
             ExistingWorkPolicy.REPLACE,
             workRequest
         )

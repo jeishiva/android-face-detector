@@ -9,7 +9,7 @@ import java.io.File
 /**
  *  from gallery
  */
-data class ImageMediaItem(
+data class MediaItem(
     val mediaId: Long,
     val contentUri: Uri,
 )
@@ -17,19 +17,20 @@ data class ImageMediaItem(
 /**
  *  faces detected in image
  */
-data class FaceDetectedItem(
-    val mediaItem: ImageMediaItem,
+data class FaceDetectedMediaItem(
+    val mediaItem: MediaItem,
     val faces: List<Face>,
     val thumbnail: Bitmap,
 )
 
 /**
- *  processed and locally saved
+ *  processed to detect faces and thumbnail locally saved
  */
 data class ProcessedMediaItem(
     val mediaId: Long,
     val file : File
 )
+
 
 /*
  *  used in FullImageScreen

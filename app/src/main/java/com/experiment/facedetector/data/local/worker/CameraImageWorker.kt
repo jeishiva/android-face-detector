@@ -7,14 +7,14 @@ import com.experiment.facedetector.image.BitmapHelper
 import com.experiment.facedetector.common.LogManager
 import com.experiment.facedetector.face.FaceDetectionProcessor
 import com.experiment.facedetector.data.local.dao.MediaDao
-import com.experiment.facedetector.repo.FaceMediaRepo
+import com.experiment.facedetector.repo.ProcessedMediaRepo
 
 class CameraImageWorker(
     private val context: Context,
     workerParams: WorkerParameters,
     private val faceDetectionProcessor: FaceDetectionProcessor,
     private val mediaDao: MediaDao,
-    private val userImageRepository: FaceMediaRepo,
+    private val userImageRepository: ProcessedMediaRepo,
     private val imageHelper: BitmapHelper
 ) : CoroutineWorker(context, workerParams) {
 

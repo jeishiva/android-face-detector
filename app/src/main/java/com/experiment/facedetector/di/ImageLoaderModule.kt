@@ -16,10 +16,12 @@ private fun provideImageLoader(context: Context, okHttpClient: OkHttpClient): Im
     return ImageLoader.Builder(context)
         .memoryCache {
             MemoryCache.Builder(context)
-                .maxSizePercent(0.35) // 35% of available memory
+                .maxSizePercent(0.30)
                 .build()
         }
         .diskCache {
+            // may not be required for local camera
+            // definitely for remote source
             DiskCache.Builder()
                 .directory(File(context.cacheDir, "image_cache"))
                 .maxSizeBytes(125L * 1024 * 1024) // 125MB
