@@ -1,11 +1,11 @@
 package com.experiment.facedetector.common
 
-import com.experiment.facedetector.config.AppConfig
+import com.experiment.facedetector.config.ThumbnailConfig
 import com.google.mlkit.vision.face.Face
 
 fun Long.toFileName(): String {
     return StringBuilder().apply {
-        append(AppConfig.THUMBNAIL_FILE_PREFIX)
+        append(ThumbnailConfig.THUMBNAIL_FILE_PREFIX)
         append(this@toFileName)
     }.toString()
 }

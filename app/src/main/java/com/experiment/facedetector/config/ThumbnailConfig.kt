@@ -2,7 +2,7 @@ package com.experiment.facedetector.config
 
 import android.graphics.Bitmap
 
-object AppConfig {
+object ThumbnailConfig {
 
     // thumbnail configs
     const val THUMBNAIL_FILE_PREFIX = "thumb_"

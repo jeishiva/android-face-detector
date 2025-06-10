@@ -9,7 +9,7 @@ import com.experiment.facedetector.common.toFaceId
 import com.experiment.facedetector.core.FaceDetectionProcessor
 import com.experiment.facedetector.data.local.entities.FaceEntity
 import com.experiment.facedetector.domain.entities.FaceTag
-import com.experiment.facedetector.domain.entities.FullImageResult
+import com.experiment.facedetector.domain.entities.FaceImageResult
 import com.experiment.facedetector.repo.MediaRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,8 +23,8 @@ class FullImageViewModel(
     private val imageHelper: BitmapHelper,
     private val mediaRepo: MediaRepo,
 ) : ViewModel() {
-    private val _fullImageResult = MutableStateFlow<FullImageResult?>(null)
-    val fullImageResult: StateFlow<FullImageResult?> = _fullImageResult
+    private val _fullImageResult = MutableStateFlow<FaceImageResult?>(null)
+    val fullImageResult: StateFlow<FaceImageResult?> = _fullImageResult
 
     init {
         init(savedStateHandle)
@@ -52,7 +52,7 @@ class FullImageViewModel(
                     savedFaceEntity
                 )
             }
-            val result = FullImageResult(mediaId, bitmap, faceTags)
+            val result = FaceImageResult(mediaId, bitmap, faceTags)
             _fullImageResult.value = result
         }
     }

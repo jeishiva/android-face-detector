@@ -53,7 +53,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.experiment.facedetector.navigation.AppRoute
 import com.experiment.facedetector.common.LogManager
-import com.experiment.facedetector.domain.entities.MediaGridItem
+import com.experiment.facedetector.domain.entities.FaceMediaGridItem
 import com.experiment.facedetector.ui.theme.AndroidFaceDetectorTheme
 import com.experiment.facedetector.ui.theme.MildGray
 import com.experiment.facedetector.ui.widgets.AppCircularProgressIndicator
@@ -122,7 +122,7 @@ fun getColumnCount(): Int {
 
 @Composable
 fun CameraImageGrid(
-    imagesFlow: Flow<PagingData<MediaGridItem>>,
+    imagesFlow: Flow<PagingData<FaceMediaGridItem>>,
     imageLoader: ImageLoader,
     modifier: Modifier = Modifier,
     columns: Int,
@@ -153,7 +153,7 @@ fun CameraImageGrid(
 private fun LoadStateContent(
     refreshState: LoadState,
     appendState: LoadState,
-    lazyPagingItems: LazyPagingItems<MediaGridItem>,
+    lazyPagingItems: LazyPagingItems<FaceMediaGridItem>,
     imageLoader: ImageLoader,
     columns: Int,
     spacing: Dp,
@@ -206,7 +206,7 @@ private fun ErrorMessage(
 
 @Composable
 private fun ImageGridContent(
-    lazyPagingItems: LazyPagingItems<MediaGridItem>,
+    lazyPagingItems: LazyPagingItems<FaceMediaGridItem>,
     imageLoader: ImageLoader,
     columns: Int,
     spacing: Dp,
@@ -315,7 +315,7 @@ private fun LazyGridScope.appendStateContent(
 
 @Composable
 fun UserImageItem(
-    image: MediaGridItem,
+    image: FaceMediaGridItem,
     size: Dp,
     imageLoader: ImageLoader,
     modifier: Modifier = Modifier,

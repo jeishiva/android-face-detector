@@ -1,6 +1,6 @@
 package com.experiment.facedetector.data.local.worker
 
-import com.experiment.facedetector.domain.entities.FaceImage
+import com.experiment.facedetector.domain.entities.FaceMediaItem
 
 
 import android.content.ContentResolver
@@ -15,13 +15,13 @@ import com.experiment.facedetector.common.toFileName
 import com.experiment.facedetector.core.FaceDetectionProcessor
 import com.experiment.facedetector.data.local.dao.MediaDao
 import com.experiment.facedetector.data.local.entities.MediaEntity
-import com.experiment.facedetector.domain.entities.UserImage
+import com.experiment.facedetector.domain.entities.MediaItem
 import com.experiment.facedetector.repo.UserImageRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.core.graphics.scale
-import com.experiment.facedetector.config.AppConfig
-import com.experiment.facedetector.config.AppConfig.THUMBNAIL_SIZE
+import com.experiment.facedetector.config.ThumbnailConfig
+import com.experiment.facedetector.config.ThumbnailConfig.THUMBNAIL_SIZE
 
 class CameraImageProcessor(
     private val context: Context,
@@ -69,14 +69,14 @@ class CameraImageProcessor(
         }
     }
 
-    private suspend fun saveFaceImageAndThumbnail(faceImage: FaceImage): MediaEntity? {
+    private suspend fun saveFaceImageAndThumbnail(faceImage: FaceMediaItem): MediaEntity? {
         try {
             LogManager.d(message = "work save face image called")
             val file = imageHelper.saveBitmap(
                 faceImage.thumbnail,
                 faceImage.userImage.mediaId.toFileName(),
-                AppConfig.THUMBNAIL_FORMAT,
-                AppConfig.THUMBNAIL_QUALITY
+                ThumbnailConfig.THUMBNAIL_FORMAT,
+                ThumbnailConfig.THUMBNAIL_QUALITY
             )
             if (file != null) {
                 val media = MediaEntity(
@@ -93,8 +93,8 @@ class CameraImageProcessor(
         return null
     }
 
-    private fun queryCameraImages(limit: Int, offset: Int): List<UserImage> {
-        val images = mutableListOf<UserImage>()
+    private fun queryCameraImages(limit: Int, offset: Int): List<MediaItem> {
+        val images = mutableListOf<MediaItem>()
         val projection = arrayOf(
             MediaStore.Images.Media._ID,
             MediaStore.Images.Media.RELATIVE_PATH
@@ -127,7 +127,7 @@ class CameraImageProcessor(
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(idCol)
                 val contentUri = ContentUris.withAppendedId(queryUri, id)
-                images.add(UserImage(mediaId = id, contentUri = contentUri))
+                images.add(MediaItem(mediaId = id, contentUri = contentUri))
                 LogManager.d(message = "Camera Image: ID=$id, Path=$contentUri")
             }
         }

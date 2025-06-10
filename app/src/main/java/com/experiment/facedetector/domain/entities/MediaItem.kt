@@ -7,24 +7,23 @@ import com.google.mlkit.vision.face.Face
 import kotlinx.serialization.Serializable
 import java.io.File
 
-data class UserImage(
+data class MediaItem(
     val mediaId: Long,
     val contentUri: Uri,
 )
 
-data class FaceImage(
-    val userImage: UserImage,
+data class FaceMediaItem(
+    val userImage: MediaItem,
     val faces: List<Face>,
     val thumbnail: Bitmap,
 )
 
-@Serializable
-data class MediaGridItem(
+data class FaceMediaGridItem(
     val mediaId: Long,
     val file : File
 )
 
-data class FullImageResult(
+data class FaceImageResult(
     val mediaId: Long,
     val imageContent: Bitmap,
     val faces: List<FaceTag>
