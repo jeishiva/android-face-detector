@@ -18,6 +18,7 @@ import com.experiment.facedetector.data.local.dao.MediaDao
 import com.experiment.facedetector.data.local.entities.MediaEntity
 import com.experiment.facedetector.data.local.worker.CameraImageWorker
 import com.experiment.facedetector.domain.entities.ProcessedMediaItem
+import com.experiment.facedetector.repo.MediaRepo
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,7 +26,7 @@ import kotlinx.coroutines.flow.map
 import java.io.File
 
 class GalleryViewModel(
-    private val mediaDao: MediaDao,
+    private val mediaRepo: MediaRepo,
     private val workManager: WorkManager
 ) : ViewModel() {
 
@@ -58,24 +59,12 @@ class GalleryViewModel(
         )
     }
 
-    val userImageFlow: Flow<PagingData<ProcessedMediaItem>> = Pager(
-        config = PagingConfig(
-            pageSize = PAGE_SIZE,
-            enablePlaceholders = true,
-            initialLoadSize = INITIAL_LOAD_SIZE
-        )
-    ) {
-        mediaDao.getPagedMedia()
-    }.flow
-        .map { pagingData: PagingData<MediaEntity> ->
-            pagingData.map { mediaEntity ->
-                ProcessedMediaItem(
-                    mediaId = mediaEntity.mediaId,
-                    file = File(mediaEntity.thumbnailUri)
-                )
-            }
-        }
-        .cachedIn(viewModelScope)
+    val userImageFlow: Flow<PagingData<ProcessedMediaItem>> =
+        mediaRepo.getPagedMedia()
+    .cachedIn(viewModelScope)
+    .onEach {
+        LogManager.d("GalleryViewModel", "New paging data emitted")
+    }
 
     companion object {
         const val PAGE_SIZE = 10
