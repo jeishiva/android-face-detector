@@ -19,10 +19,7 @@ import androidx.room.PrimaryKey
 )
 data class FaceEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val mediaId: String,
-    val left: Float,
-    val top: Float,
-    val right: Float,
-    val bottom: Float,
-    val tag: String
+    val mediaId: Long,
+    val faceId: String,
+    val tag : String
 )

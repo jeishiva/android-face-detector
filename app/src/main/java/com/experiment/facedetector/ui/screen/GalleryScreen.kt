@@ -45,9 +45,10 @@ import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.experiment.facedetector.common.LogManager
-import com.experiment.facedetector.domain.entities.UIImage
+import com.experiment.facedetector.domain.entities.MediaGridItem
 import com.experiment.facedetector.ui.theme.AndroidFaceDetectorTheme
 import com.experiment.facedetector.ui.theme.MildGray
+import com.experiment.facedetector.ui.widgets.AppCircularProgressIndicator
 import com.experiment.facedetector.viewmodel.GalleryViewModel
 import kotlinx.coroutines.flow.Flow
 import org.koin.androidx.compose.koinViewModel
@@ -104,17 +105,18 @@ fun getColumnCount(): Int {
 
 @Composable
 fun CameraImageGrid(
-    imagesFlow: Flow<PagingData<UIImage>>,
+    imagesFlow: Flow<PagingData<MediaGridItem>>,
     imageLoader: ImageLoader,
     modifier: Modifier = Modifier,
     columns: Int,
     spacing: Dp,
-    onItemClick: (Long) -> Unit // <- Add this
+    onItemClick: (Long) -> Unit
 ) {
     val lazyPagingItems = imagesFlow.collectAsLazyPagingItems()
     LogManager.d("CameraImageGrid", "Item count: ${lazyPagingItems.itemCount}")
     Box(
-        modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
         LoadStateContent(
             refreshState = lazyPagingItems.loadState.refresh,
@@ -132,7 +134,7 @@ fun CameraImageGrid(
 private fun LoadStateContent(
     refreshState: LoadState,
     appendState: LoadState,
-    lazyPagingItems: LazyPagingItems<UIImage>,
+    lazyPagingItems: LazyPagingItems<MediaGridItem>,
     imageLoader: ImageLoader,
     columns: Int,
     spacing: Dp,
@@ -141,7 +143,7 @@ private fun LoadStateContent(
     when {
         refreshState is LoadState.Loading && lazyPagingItems.itemCount == 0 -> {
             // Show loading only when no items are loaded initially
-            LoadingIndicator()
+            AppCircularProgressIndicator()
             LogManager.d("CameraImageGrid", "Refresh state: Loading, no items")
         }
 
@@ -163,18 +165,6 @@ private fun LoadStateContent(
     }
 }
 
-// Displays a loading indicator
-@Composable
-private fun LoadingIndicator(
-    modifier: Modifier = Modifier
-) {
-    CircularProgressIndicator(
-        modifier = modifier
-            .size(72.dp)
-            .padding(16.dp)
-    )
-}
-
 // Displays an error message
 @Composable
 private fun ErrorMessage(
@@ -192,7 +182,7 @@ private fun ErrorMessage(
 
 @Composable
 private fun ImageGridContent(
-    lazyPagingItems: LazyPagingItems<UIImage>,
+    lazyPagingItems: LazyPagingItems<MediaGridItem>,
     imageLoader: ImageLoader,
     columns: Int,
     spacing: Dp,
@@ -233,10 +223,8 @@ private fun calculateImageSize(columns: Int, spacing: Dp): Dp {
     val density = LocalDensity.current
     val spacingPx = with(density) { spacing.toPx() }
     val totalSpacingPx = spacingPx * (columns - 1)
-
     val availableWidthPx = screenWidthPx - totalSpacingPx
     val imageSizePx = availableWidthPx / columns
-
     return with(density) { imageSizePx.toDp() }
 }
 
@@ -244,16 +232,10 @@ private fun LazyGridScope.appendStateContent(appendState: LoadState) {
     when (appendState) {
         is LoadState.Loading -> {
             item {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .size(72.dp)
-                        .padding(16.dp)
-                )
+                AppCircularProgressIndicator()
                 LogManager.d("CameraImageGrid", "Append state: Loading")
             }
         }
-
         is LoadState.Error -> {
             item {
                 Text(
@@ -276,7 +258,7 @@ private fun LazyGridScope.appendStateContent(appendState: LoadState) {
 
 @Composable
 fun UserImageItem(
-    image: UIImage,
+    image: MediaGridItem,
     size: Dp,
     imageLoader: ImageLoader,
     modifier: Modifier = Modifier,

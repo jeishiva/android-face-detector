@@ -9,11 +9,9 @@ import com.experiment.facedetector.data.local.entities.FaceEntity
 @Dao
 interface FaceDao {
     @Query("SELECT * FROM faces WHERE mediaId = :mediaId")
-    suspend fun getFacesForMedia(mediaId: String): List<FaceEntity>
+    suspend fun getFacesForMedia(mediaId: Long): List<FaceEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertFaces(faces: List<FaceEntity>)
+    suspend fun insertOrUpdateFace(faces: FaceEntity)
 
-    @Query("DELETE FROM faces WHERE mediaId = :mediaId")
-    suspend fun deleteFaces(mediaId: String)
 }

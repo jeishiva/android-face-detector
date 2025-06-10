@@ -13,7 +13,7 @@ import androidx.work.WorkManager
 import com.experiment.facedetector.data.local.dao.MediaDao
 import com.experiment.facedetector.data.local.entities.MediaEntity
 import com.experiment.facedetector.data.local.worker.CameraImageWorker
-import com.experiment.facedetector.domain.entities.UIImage
+import com.experiment.facedetector.domain.entities.MediaGridItem
 import com.experiment.facedetector.repo.UserImageRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -25,7 +25,7 @@ class GalleryViewModel(
     private val workManager: WorkManager
 ) : ViewModel() {
 
-    val userImageFlow: Flow<PagingData<UIImage>> = Pager(
+    val userImageFlow: Flow<PagingData<MediaGridItem>> = Pager(
         config = PagingConfig(
             pageSize = PAGE_SIZE,
             enablePlaceholders = true,
@@ -35,7 +35,7 @@ class GalleryViewModel(
     }.flow
         .map { pagingData: PagingData<MediaEntity> ->
             pagingData.map { mediaEntity ->
-                UIImage(
+                MediaGridItem(
                     mediaId = mediaEntity.mediaId,
                     file = File(mediaEntity.thumbnailUri)
                 )

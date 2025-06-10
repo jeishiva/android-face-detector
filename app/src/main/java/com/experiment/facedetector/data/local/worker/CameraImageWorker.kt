@@ -1,16 +1,12 @@
 package com.experiment.facedetector.data.local.worker
 
 import android.content.Context
-import android.graphics.Bitmap
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.experiment.facedetector.common.ImageHelper
 import com.experiment.facedetector.common.LogManager
-import com.experiment.facedetector.core.AppConfig
 import com.experiment.facedetector.core.FaceDetectionProcessor
 import com.experiment.facedetector.data.local.dao.MediaDao
-import com.experiment.facedetector.data.local.entities.MediaEntity
-import com.experiment.facedetector.domain.entities.FaceImage
 import com.experiment.facedetector.repo.UserImageRepository
 
 class CameraImageWorker(
@@ -39,6 +35,4 @@ class CameraImageWorker(
             Result.failure()
         }
     }
-
-
 }

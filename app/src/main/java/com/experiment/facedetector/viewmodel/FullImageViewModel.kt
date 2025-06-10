@@ -1,13 +1,15 @@
 package com.experiment.facedetector.viewmodel
 
-import android.graphics.Bitmap
 import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.experiment.facedetector.common.ImageHelper
+import com.experiment.facedetector.common.toFaceId
 import com.experiment.facedetector.core.FaceDetectionProcessor
-import com.experiment.facedetector.data.local.entities.MediaEntity
+import com.experiment.facedetector.data.local.entities.FaceEntity
+import com.experiment.facedetector.domain.entities.FaceTag
+import com.experiment.facedetector.domain.entities.FullImageResult
 import com.experiment.facedetector.repo.MediaRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,18 +22,60 @@ class FullImageViewModel(
     private val imageHelper: ImageHelper,
     private val mediaRepo: MediaRepo,
 ) : ViewModel() {
-    private val _media = MutableStateFlow<Bitmap?>(null)
-    val media: StateFlow<Bitmap?> = _media
+    private val _fullImageResult = MutableStateFlow<FullImageResult?>(null)
+    val fullImageResult: StateFlow<FullImageResult?> = _fullImageResult
 
     init {
+        init(savedStateHandle)
+    }
+
+    fun init(savedStateHandle: SavedStateHandle) {
         val mediaId: Long = savedStateHandle["mediaId"] ?: error("Missing mediaId")
         viewModelScope.launch(Dispatchers.IO) {
             val mediaEntity = mediaRepo.getMedia(mediaId)
+            val savedFaceTags = mediaRepo.getFaces(mediaId)
             val bitmap = imageHelper.decodeBitmap(mediaEntity.contentUri.toUri(), 1280, 720)
             val faces = faceDetectionProcessor.detectFaces(bitmap)
-            val result = imageHelper.drawFaceBoundingBoxes(bitmap, faces)
-            _media.value = result
+            val faceTags = faces.map {
+                val faceId = it.toFaceId(mediaId)
+                val savedFaceEntity = savedFaceTags.find { it.faceId == faceId }
+                FaceTag(
+                    id = faceId,
+                    left = it.boundingBox.left,
+                    top = it.boundingBox.top,
+                    right = it.boundingBox.right,
+                    bottom = it.boundingBox.bottom,
+                    height = it.boundingBox.height(),
+                    width = it.boundingBox.width(),
+                    tag = savedFaceEntity?.tag ?: "",
+                    savedFaceEntity
+                )
+            }
+            val result = FullImageResult(mediaId, bitmap, faceTags)
+            _fullImageResult.value = result
+        }
+    }
+
+    fun saveFaceTag(mediaId: Long, faceTag: FaceTag) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val faceEntity = faceTag.savedFaceEntity?.let {
+                FaceEntity(
+                    id = it.id,
+                    mediaId = mediaId,
+                    faceId = faceTag.id,
+                    tag = faceTag.tag
+                )
+            } ?: run {
+                FaceEntity(
+                    mediaId = mediaId,
+                    faceId = faceTag.id,
+                    tag = faceTag.tag
+                )
+            }
+            mediaRepo.faceDao.insertOrUpdateFace(faceEntity)
         }
     }
 }
+
+
 

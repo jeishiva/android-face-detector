@@ -7,7 +7,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.experiment.facedetector.data.local.entities.MediaEntity
-import com.experiment.facedetector.domain.entities.UIImage
 
 @Dao
 interface MediaDao {
