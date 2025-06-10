@@ -29,6 +29,14 @@ class MediaRepo(
         return faceDao.getFacesForMedia(mediaId)
     }
 
+    suspend fun addProcessedMedia(mediaList: List<MediaEntity>) {
+        mediaDao.insertMediaList(mediaList)
+    }
+
+    suspend fun getExistingMediaIds(mediaIds: List<Long>): List<Long> {
+        return mediaDao.getExistingMediaIds(mediaIds)
+    }
+
     fun getPagedMedia(): Flow<PagingData<ProcessedMediaItem>> {
         return Pager(
             config = PagingConfig(

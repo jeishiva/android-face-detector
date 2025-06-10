@@ -8,10 +8,19 @@ import org.koin.dsl.module
 val processorModule = module {
 
     single {
-        FaceDetectionProcessor(get(), get())
+        FaceDetectionProcessor(
+            faceDetector = get(),
+            imageHelper = get()
+        )
     }
 
     worker {
-        CameraImageWorker(get(), get(), get(), get(), get())
+        CameraImageWorker(
+            context = get(),
+            workerParams = get(),
+            faceDetectionProcessor = get(),
+            mediaRepo = get(),
+            imageHelper = get()
+        )
     }
 }

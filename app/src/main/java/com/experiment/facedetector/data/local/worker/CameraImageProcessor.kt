@@ -14,13 +14,13 @@ import com.experiment.facedetector.image.BitmapHelper
 import com.experiment.facedetector.common.LogManager
 import com.experiment.facedetector.common.toFileName
 import com.experiment.facedetector.face.FaceDetectionProcessor
-import com.experiment.facedetector.data.local.dao.MediaDao
 import com.experiment.facedetector.data.local.entities.MediaEntity
 import com.experiment.facedetector.domain.entities.MediaItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.experiment.facedetector.config.ThumbnailConfig
 import com.experiment.facedetector.config.ThumbnailConfig.THUMBNAIL_SIZE
+import com.experiment.facedetector.repo.MediaRepo
 
 /**
  *  queries camera images in batches from local storage
@@ -33,7 +33,7 @@ class CameraImageProcessor(
     private val context: Context,
     private val pageSize: Int = 5,
     private val faceDetectionProcessor: FaceDetectionProcessor,
-    private val mediaDao: MediaDao,
+    private val mediaRepo: MediaRepo,
     private val imageHelper: BitmapHelper,
 ) {
 
@@ -82,7 +82,7 @@ class CameraImageProcessor(
 
         // Batch insert all entities
         if (mediaEntities.isNotEmpty()) {
-            mediaDao.insertMediaList(mediaEntities)
+            mediaRepo.addProcessedMedia(mediaEntities)
         }
 
         return BatchResult(processedCount, mediaEntities.size)
@@ -90,7 +90,7 @@ class CameraImageProcessor(
 
     private suspend fun filterNewImages(images: List<MediaItem>): List<MediaItem> {
         val allIds = images.map { it.mediaId }
-        val existingIds = mediaDao.getExistingMediaIds(allIds)
+        val existingIds = mediaRepo.getExistingMediaIds(allIds)
         return images.filterNot { it.mediaId in existingIds }
     }
 

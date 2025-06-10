@@ -8,6 +8,7 @@ import com.experiment.facedetector.image.BitmapHelper
 import com.experiment.facedetector.face.FaceDetectionProcessor
 import com.experiment.facedetector.data.local.dao.MediaDao
 import com.experiment.facedetector.data.local.worker.CameraImageWorker
+import com.experiment.facedetector.repo.MediaRepo
 import org.koin.core.Koin
 
 class KoinWorkerFactory(private val koin: Koin) : WorkerFactory() {
@@ -28,8 +29,10 @@ class KoinWorkerFactory(private val koin: Koin) : WorkerFactory() {
         workerParameters: WorkerParameters
     ): CameraImageWorker {
         val processor: FaceDetectionProcessor = koin.get()
-        val mediaDao: MediaDao = koin.get()
+        val mediaRepo: MediaRepo = koin.get()
         val imageHelper: BitmapHelper = koin.get()
-        return CameraImageWorker(appContext, workerParameters, processor, mediaDao, imageHelper)
+        return CameraImageWorker(appContext,
+            workerParameters,
+            processor, mediaRepo, imageHelper)
     }
 }
