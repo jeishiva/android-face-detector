@@ -12,6 +12,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import com.experiment.facedetector.common.CAMERA_WORKER_TAG
 import com.experiment.facedetector.common.LogManager
 import com.experiment.facedetector.data.local.dao.MediaDao
 import com.experiment.facedetector.data.local.entities.MediaEntity
@@ -51,10 +52,10 @@ class GalleryViewModel(
 
     fun startInitialWork() {
         val workRequest = OneTimeWorkRequestBuilder<CameraImageWorker>()
-            .addTag("camera_image_work")
+            .addTag(CAMERA_WORKER_TAG)
             .build()
         workManager.enqueueUniqueWork(
-            CAMERA,
+            CAMERA_WORKER_TAG,
             ExistingWorkPolicy.REPLACE,
             workRequest
         )

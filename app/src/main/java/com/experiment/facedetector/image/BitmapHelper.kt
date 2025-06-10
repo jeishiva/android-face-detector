@@ -73,20 +73,19 @@ class BitmapHelper(val context: Context) {
             BufferedInputStream(inputStream, 8192).use { bufferedStream ->
                 bufferedStream.mark(Int.MAX_VALUE)
                 val rotationDegrees = getImageRotation(bufferedStream)
-                // Step 2: Get dimensions
+                //  Get dimensions
                 val (originalWidth, originalHeight) = getImageDimensions(bufferedStream)
 
-                // Step 3: Adjust dimensions for rotation
+                //  Adjust dimensions for rotation
                 val (adjustedWidth, adjustedHeight) = if (rotationDegrees == 90 || rotationDegrees == 270) {
                     originalHeight to originalWidth
                 } else {
                     originalWidth to originalHeight
                 }
-
-                // Step 4: Calculate inSampleSize
+                //  Calculate inSampleSize
                 val sampleSize = calculateInSampleSize(adjustedWidth, adjustedHeight, targetWidth, targetHeight)
 
-                // Step 5: Decode bitmap
+                // Decode bitmap
                 val options = BitmapFactory.Options().apply {
                     inSampleSize = sampleSize
                     inPreferredConfig = Bitmap.Config.ARGB_8888
@@ -96,7 +95,7 @@ class BitmapHelper(val context: Context) {
                 val decodedBitmap = BitmapFactory.decodeStream(bufferedStream, null, options)
                     ?: throw IllegalArgumentException("Failed to decode bitmap from URI: $contentUri")
 
-                // Step 6: Rotate if needed
+                // Rotate if needed
                 val resultBitmap = rotateBitmapIfNeeded(decodedBitmap, rotationDegrees)
                 if (resultBitmap != decodedBitmap) {
                     BitmapPool.put(decodedBitmap)
@@ -142,18 +141,6 @@ class BitmapHelper(val context: Context) {
         BitmapFactory.decodeStream(inputStream, null, options)
         inputStream.reset()
         return options.outWidth to options.outHeight
-    }
-
-    fun createThumbnail(bitmap: Bitmap, maxSize: Int): Bitmap {
-        val scale = maxSize.toFloat() / max(bitmap.width, bitmap.height)
-        val width = (bitmap.width * scale).toInt()
-        val height = (bitmap.height * scale).toInt()
-        val thumbnail = BitmapPool.get(width, height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(thumbnail)
-        val src = Rect(0, 0, bitmap.width, bitmap.height)
-        val dst = Rect(0, 0, width, height)
-        canvas.drawBitmap(bitmap, src, dst, null)
-        return thumbnail
     }
 
     private fun rotateBitmapIfNeeded(bitmap: Bitmap, rotationDegrees: Int): Bitmap {

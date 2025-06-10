@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.experiment.facedetector.image.BitmapHelper
 import com.experiment.facedetector.common.toFaceId
+import com.experiment.facedetector.config.FullImageConfig
 import com.experiment.facedetector.face.FaceDetectionProcessor
 import com.experiment.facedetector.data.local.entities.FaceEntity
 import com.experiment.facedetector.domain.entities.FaceTag
@@ -35,7 +36,8 @@ class FullImageViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             val mediaEntity = mediaRepo.getMedia(mediaId)
             val savedFaceTags = mediaRepo.getFaces(mediaId)
-            val bitmap = imageHelper.decodeBitmap(mediaEntity.contentUri.toUri(), 1280, 720)
+            val bitmap = imageHelper.decodeBitmap(mediaEntity.contentUri.toUri(), FullImageConfig.MAX_HEIGHT,
+                FullImageConfig.MAX_WIDTH)
             val faces = faceDetectionProcessor.detectFaces(bitmap)
             val faceTags = faces.map {
                 val faceId = it.toFaceId(mediaId)
