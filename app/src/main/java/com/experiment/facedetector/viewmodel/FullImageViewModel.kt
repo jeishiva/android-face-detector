@@ -56,20 +56,20 @@ class FullImageViewModel(
         }
     }
 
-    fun saveFaceTag(mediaId: Long, faceTag: FaceTag) {
+    fun saveFaceTag(mediaId: Long, faceTag: FaceTag, tag: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val faceEntity = faceTag.savedFaceEntity?.let {
                 FaceEntity(
                     id = it.id,
                     mediaId = mediaId,
                     faceId = faceTag.id,
-                    tag = faceTag.tag
+                    tag = tag
                 )
             } ?: run {
                 FaceEntity(
                     mediaId = mediaId,
                     faceId = faceTag.id,
-                    tag = faceTag.tag
+                    tag = tag
                 )
             }
             mediaRepo.faceDao.insertOrUpdateFace(faceEntity)

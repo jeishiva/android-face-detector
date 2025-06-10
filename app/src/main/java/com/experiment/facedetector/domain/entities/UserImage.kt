@@ -26,7 +26,7 @@ data class MediaGridItem(
 
 data class FullImageResult(
     val mediaId: Long,
-    val thumbnail: Bitmap,
+    val imageContent: Bitmap,
     val faces: List<FaceTag>
 )
 
