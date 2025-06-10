@@ -1,4 +1,4 @@
-package com.experiment.facedetector.common
+package com.experiment.facedetector.image
 
 import android.graphics.Bitmap
 import androidx.collection.LruCache

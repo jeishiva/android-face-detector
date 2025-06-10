@@ -51,7 +51,7 @@ import androidx.work.WorkInfo
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.experiment.facedetector.AppRoute
+import com.experiment.facedetector.navigation.AppRoute
 import com.experiment.facedetector.common.LogManager
 import com.experiment.facedetector.domain.entities.MediaGridItem
 import com.experiment.facedetector.ui.theme.AndroidFaceDetectorTheme

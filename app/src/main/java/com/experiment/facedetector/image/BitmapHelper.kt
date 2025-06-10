@@ -1,4 +1,4 @@
-package com.experiment.facedetector.common
+package com.experiment.facedetector.image
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -10,11 +10,6 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.net.Uri
 import androidx.exifinterface.media.ExifInterface
-import androidx.exifinterface.media.ExifInterface.ORIENTATION_NORMAL
-import androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_180
-import androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_270
-import androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_90
-import androidx.exifinterface.media.ExifInterface.TAG_ORIENTATION
 import com.google.mlkit.vision.face.Face
 import java.io.BufferedInputStream
 import java.io.File
@@ -22,7 +17,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import kotlin.math.max
 
-class ImageHelper(val context: Context) {
+class BitmapHelper(val context: Context) {
     fun saveBitmap(
         bitmap: Bitmap,
         filename: String,
@@ -36,7 +31,7 @@ class ImageHelper(val context: Context) {
                 out.flush()
             }
             val sizeInKB = file.length() / 1024
-            println("Saved WebP file size: $sizeInKB KB")
+            println("Saved thumbnail file size: $sizeInKB KB")
             return file
         } catch (e: IOException) {
             e.printStackTrace()
@@ -121,10 +116,13 @@ class ImageHelper(val context: Context) {
         inputStream.mark(Int.MAX_VALUE)
         return try {
             val exif = ExifInterface(inputStream)
-            when (exif.getAttributeInt(TAG_ORIENTATION, ORIENTATION_NORMAL)) {
-                ORIENTATION_ROTATE_90 -> 90
-                ORIENTATION_ROTATE_180 -> 180
-                ORIENTATION_ROTATE_270 -> 270
+            when (exif.getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
+            )) {
+                ExifInterface.ORIENTATION_ROTATE_90 -> 90
+                ExifInterface.ORIENTATION_ROTATE_180 -> 180
+                ExifInterface.ORIENTATION_ROTATE_270 -> 270
                 else -> 0
             }
         } finally {
@@ -183,4 +181,3 @@ class ImageHelper(val context: Context) {
         return inSampleSize
     }
 }
-

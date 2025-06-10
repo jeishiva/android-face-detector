@@ -165,7 +165,7 @@ fun FullImageWithFaceOverlay(
                                 modifier = Modifier
                                     .align(Alignment.BottomCenter)
                                     .padding(2.dp),
-                                textStyle = MaterialTheme.typography.labelMedium,
+                                textStyle = MaterialTheme.typography.labelLarge,
                                 colors = TextFieldDefaults.colors(
                                     focusedContainerColor = Color(0x80000000),
                                     unfocusedContainerColor = Color(0x80000000),

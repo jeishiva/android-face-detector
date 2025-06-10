@@ -4,7 +4,7 @@ import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.experiment.facedetector.common.ImageHelper
+import com.experiment.facedetector.image.BitmapHelper
 import com.experiment.facedetector.common.toFaceId
 import com.experiment.facedetector.core.FaceDetectionProcessor
 import com.experiment.facedetector.data.local.entities.FaceEntity
@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 class FullImageViewModel(
     savedStateHandle: SavedStateHandle,
     private val faceDetectionProcessor: FaceDetectionProcessor,
-    private val imageHelper: ImageHelper,
+    private val imageHelper: BitmapHelper,
     private val mediaRepo: MediaRepo,
 ) : ViewModel() {
     private val _fullImageResult = MutableStateFlow<FullImageResult?>(null)

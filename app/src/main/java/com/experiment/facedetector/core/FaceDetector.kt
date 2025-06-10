@@ -9,11 +9,11 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetector
 import android.graphics.Bitmap
-import com.experiment.facedetector.common.ImageHelper
+import com.experiment.facedetector.image.BitmapHelper
 
 class FaceDetectionProcessor(
     private val faceDetector: FaceDetector,
-    private val imageHelper: ImageHelper
+    private val imageHelper: BitmapHelper
 ) {
     suspend fun processImage(userImage: UserImage): FaceImage = withContext(Dispatchers.IO) {
         val bitmap = imageHelper.decodeBitmap(userImage.contentUri, MAX_HEIGHT, MAX_WIDTH)

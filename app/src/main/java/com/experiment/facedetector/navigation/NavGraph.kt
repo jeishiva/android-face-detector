@@ -1,4 +1,4 @@
-package com.experiment.facedetector
+package com.experiment.facedetector.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
@@ -30,7 +30,6 @@ fun AppNavGraph(navController: NavHostController) {
         }
     }
 }
-
 
 sealed class AppRoute(val route: String) {
     object Splash : AppRoute("splash")

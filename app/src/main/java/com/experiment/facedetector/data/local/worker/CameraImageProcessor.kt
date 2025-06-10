@@ -6,29 +6,30 @@ import com.experiment.facedetector.domain.entities.FaceImage
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.provider.MediaStore
-import com.experiment.facedetector.common.BitmapPool
-import com.experiment.facedetector.common.ImageHelper
+import com.experiment.facedetector.image.BitmapPool
+import com.experiment.facedetector.image.BitmapHelper
 import com.experiment.facedetector.common.LogManager
 import com.experiment.facedetector.common.toFileName
 import com.experiment.facedetector.core.FaceDetectionProcessor
 import com.experiment.facedetector.data.local.dao.MediaDao
 import com.experiment.facedetector.data.local.entities.MediaEntity
 import com.experiment.facedetector.domain.entities.UserImage
-import com.experiment.facedetector.repo.UserImageRepository
+import com.experiment.facedetector.repo.UserImageRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.core.graphics.scale
+import com.experiment.facedetector.config.AppConfig
+import com.experiment.facedetector.config.AppConfig.THUMBNAIL_SIZE
 
 class CameraImageProcessor(
     private val context: Context,
     private val pageSize: Int = 5,
     private val faceDetectionProcessor: FaceDetectionProcessor,
     private val mediaDao: MediaDao,
-    private val imageHelper: ImageHelper,
-    private val userImageRepository: UserImageRepository,
+    private val imageHelper: BitmapHelper,
+    private val userImageRepository: UserImageRepo,
 ) {
 
     suspend fun processAllImages() = withContext(Dispatchers.IO) {
@@ -50,7 +51,7 @@ class CameraImageProcessor(
                         val result =
                             imageHelper.drawFaceBoundingBoxes(faceImage.thumbnail, faceImage.faces)
                         BitmapPool.put(faceImage.thumbnail)
-                        val thumbnail = result.scale(300, 300)
+                        val thumbnail = result.scale(THUMBNAIL_SIZE, THUMBNAIL_SIZE)
                         BitmapPool.put(result)
                         saveFaceImageAndThumbnail(faceImage.copy(thumbnail = thumbnail))?.let {
                             mediaEntityList.add(it)
@@ -74,8 +75,8 @@ class CameraImageProcessor(
             val file = imageHelper.saveBitmap(
                 faceImage.thumbnail,
                 faceImage.userImage.mediaId.toFileName(),
-                Bitmap.CompressFormat.WEBP_LOSSY,
-                35
+                AppConfig.THUMBNAIL_FORMAT,
+                AppConfig.THUMBNAIL_QUALITY
             )
             if (file != null) {
                 val media = MediaEntity(

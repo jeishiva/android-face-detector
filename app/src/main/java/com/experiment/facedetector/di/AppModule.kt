@@ -6,11 +6,11 @@ import androidx.work.WorkManager
 import coil.ImageLoader
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
-import com.experiment.facedetector.common.ImageHelper
+import com.experiment.facedetector.image.BitmapHelper
 import com.experiment.facedetector.core.FaceDetectionProcessor
 import com.experiment.facedetector.data.local.worker.CameraImageWorker
 import com.experiment.facedetector.repo.MediaRepo
-import com.experiment.facedetector.repo.UserImageRepository
+import com.experiment.facedetector.repo.UserImageRepo
 import com.experiment.facedetector.viewmodel.FullImageViewModel
 import com.experiment.facedetector.viewmodel.GalleryViewModel
 import com.experiment.facedetector.viewmodel.SplashViewModel
@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit
 
 val appModule = module {
     single {
-        UserImageRepository(get(), get())
+        UserImageRepo(get(), get())
     }
     single {
         MediaRepo(get(), get())
@@ -54,7 +54,7 @@ val appModule = module {
         FaceDetectionProcessor(get(), get())
     }
     single {
-        ImageHelper(get())
+        BitmapHelper(get())
     }
     viewModel { GalleryViewModel(get(), get(), get()) }
     viewModel { SplashViewModel() }

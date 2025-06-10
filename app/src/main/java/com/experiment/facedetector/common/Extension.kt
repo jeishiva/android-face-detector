@@ -1,6 +1,6 @@
 package com.experiment.facedetector.common
 
-import com.experiment.facedetector.core.AppConfig
+import com.experiment.facedetector.config.AppConfig
 import com.google.mlkit.vision.face.Face
 
 fun Long.toFileName(): String {
