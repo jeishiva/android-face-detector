@@ -39,13 +39,13 @@ class MediaRepo(
         ) {
             mediaDao.getPagedMedia()
         }.flow.map { pagingData: PagingData<MediaEntity> ->
-                pagingData.map { mediaEntity ->
-                    ProcessedMediaItem(
-                        mediaId = mediaEntity.mediaId,
-                        file = File(mediaEntity.thumbnailUri)
-                    )
-                }
-            }.flowOn(Dispatchers.IO)
+            pagingData.map { mediaEntity ->
+                ProcessedMediaItem(
+                    mediaId = mediaEntity.mediaId,
+                    file = File(mediaEntity.thumbnailUri)
+                )
+            }
+        }.flowOn(Dispatchers.IO)
     }
 }
 
