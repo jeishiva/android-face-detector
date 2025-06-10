@@ -59,6 +59,7 @@ import com.experiment.facedetector.common.LogManager
 import com.experiment.facedetector.domain.entities.ProcessedMediaItem
 import com.experiment.facedetector.ui.theme.AndroidFaceDetectorTheme
 import com.experiment.facedetector.ui.theme.MildGray
+import com.experiment.facedetector.ui.widgets.AppBar
 import com.experiment.facedetector.ui.widgets.AppCircularProgressIndicator
 import com.experiment.facedetector.viewmodel.GalleryViewModel
 import kotlinx.coroutines.delay
@@ -110,14 +111,11 @@ private fun InitializeWork(viewModel: GalleryViewModel) {
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun GalleryTopBar(activity: Activity?) {
-    TopAppBar(
-        title = { Text(stringResource(R.string.gallery))},
-        navigationIcon = {
-            IconButton(onClick = { activity?.finish() }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-            }
-        }
-    )
+    AppBar(
+        title = stringResource(R.string.gallery),
+    ) {
+        activity?.finish()
+    }
 }
 
 @Composable

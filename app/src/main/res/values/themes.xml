@@ -3,7 +3,4 @@
     <style name="Theme.AndroidFaceDetector" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@color/splash_background</item>
     </style>
-
-
-
 </resources>

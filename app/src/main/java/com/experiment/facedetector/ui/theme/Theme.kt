@@ -64,8 +64,8 @@ fun AndroidFaceDetectorTheme(
                   .background(
                       Brush.verticalGradient(
                           colors = listOf(
-                              Color(0xFF018786),
-                              Color(0xFF018780),
+                              GradientStartMildGrey,
+                              GradientEndMildBlack,
                           )
                       )
                   )

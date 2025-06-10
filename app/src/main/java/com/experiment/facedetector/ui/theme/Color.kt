@@ -12,3 +12,6 @@ val Pink40 = Color(0xFF7D5260)
 
 val MildGray = Color(0xFFA9A9A9)
 
+
+val GradientStartMildGrey = Color(0xF5424242)
+val GradientEndMildBlack = Color(0xFF424242)
