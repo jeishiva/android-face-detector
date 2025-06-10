@@ -6,7 +6,6 @@ import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
 import com.experiment.facedetector.image.BitmapHelper
 import com.experiment.facedetector.face.FaceDetectionProcessor
-import com.experiment.facedetector.data.local.dao.MediaDao
 import com.experiment.facedetector.data.local.worker.CameraImageWorker
 import com.experiment.facedetector.repo.MediaRepo
 import org.koin.core.Koin
