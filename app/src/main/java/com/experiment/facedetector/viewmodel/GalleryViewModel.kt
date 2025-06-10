@@ -14,19 +14,21 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.experiment.facedetector.common.CAMERA_WORKER_TAG
 import com.experiment.facedetector.common.LogManager
-import com.experiment.facedetector.data.local.dao.MediaDao
-import com.experiment.facedetector.data.local.entities.MediaEntity
 import com.experiment.facedetector.data.local.worker.CameraImageWorker
 import com.experiment.facedetector.domain.entities.ProcessedMediaItem
 import com.experiment.facedetector.repo.MediaRepo
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import java.io.File
+
+/**
+ *  work manager triggers camera processor from here
+ *  currently work manager state and page source state are not unified
+ *  todo : unify both state and expose to UI
+ */
 
 class GalleryViewModel(
-    private val mediaRepo: MediaRepo,
+    mediaRepo: MediaRepo,
     private val workManager: WorkManager
 ) : ViewModel() {
 
@@ -36,6 +38,13 @@ class GalleryViewModel(
     init {
         observeWorkStatus()
     }
+
+    val userImageFlow: Flow<PagingData<ProcessedMediaItem>> =
+        mediaRepo.getPagedMedia()
+            .cachedIn(viewModelScope)
+            .onEach {
+                LogManager.d("GalleryViewModel", "New paging data emitted")
+            }
 
     private fun observeWorkStatus() {
         workManager
@@ -57,13 +66,6 @@ class GalleryViewModel(
             ExistingWorkPolicy.REPLACE,
             workRequest
         )
-    }
-
-    val userImageFlow: Flow<PagingData<ProcessedMediaItem>> =
-        mediaRepo.getPagedMedia()
-    .cachedIn(viewModelScope)
-    .onEach {
-        LogManager.d("GalleryViewModel", "New paging data emitted")
     }
 
     companion object {
