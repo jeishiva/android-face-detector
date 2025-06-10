@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -60,6 +61,7 @@ import com.experiment.facedetector.ui.theme.AndroidFaceDetectorTheme
 import com.experiment.facedetector.ui.theme.MildGray
 import com.experiment.facedetector.ui.widgets.AppCircularProgressIndicator
 import com.experiment.facedetector.viewmodel.GalleryViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
@@ -69,8 +71,7 @@ import org.koin.compose.koinInject
 fun GalleryScreen(navController: NavHostController) {
     val viewModel: GalleryViewModel = koinViewModel()
     val imageLoader: ImageLoader = koinInject()
-    val workInfos by viewModel.workInfoStateFlow.collectAsState()
-    val isLoadingPhotos = workInfos.any { it.state == WorkInfo.State.RUNNING }
+    val isWorkerRunning by viewModel.isWorkerRunning.collectAsState()
     val activity = LocalContext.current as? Activity
 
     LogManager.d(message = "rendering gallery screen")
@@ -89,7 +90,7 @@ fun GalleryScreen(navController: NavHostController) {
                     .padding(innerPadding),
                 viewModel = viewModel,
                 imageLoader = imageLoader,
-                isLoadingPhotos = isLoadingPhotos,
+                isLoadingPhotos = isWorkerRunning,
                 navController = navController
             )
         }
@@ -247,7 +248,10 @@ private fun ImageGrid(
     onItemClick: (Long) -> Unit
 ) {
     val imageSize = calculateOptimalImageSize(columns, spacing)
-
+    val debouncedAppendState by produceState(initialValue = appendState) {
+        delay(1000)
+        value = appendState
+    }
     LazyVerticalGrid(
         columns = GridCells.Fixed(columns),
         modifier = Modifier.fillMaxSize(),
@@ -261,7 +265,7 @@ private fun ImageGrid(
             imageLoader = imageLoader,
             onItemClick = onItemClick
         )
-        GridAppendStateContent(appendState, isLoadingPhotos)
+        GridAppendStateContent(debouncedAppendState, isLoadingPhotos)
     }
 }
 

@@ -33,7 +33,7 @@ class MediaRepo(
         return Pager(
             config = PagingConfig(
                 pageSize = PAGE_SIZE,
-                enablePlaceholders = true,
+                enablePlaceholders = false,
                 initialLoadSize = INITIAL_LOAD_SIZE
             )
         ) {

@@ -33,8 +33,13 @@ class GalleryViewModel(
 ) : ViewModel() {
 
     private val _workInfoStateFlow = MutableStateFlow<List<WorkInfo>>(emptyList())
-    val workInfoStateFlow: StateFlow<List<WorkInfo>> = _workInfoStateFlow
-
+    val isWorkerRunning: StateFlow<Boolean> = _workInfoStateFlow
+        .map { workInfos -> workInfos.any { it.state == WorkInfo.State.RUNNING } }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = _workInfoStateFlow.value.any { it.state == WorkInfo.State.RUNNING }
+        )
     init {
         observeWorkStatus()
     }
