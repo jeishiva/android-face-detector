@@ -5,9 +5,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -22,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -41,6 +44,7 @@ import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.work.WorkInfo
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -59,6 +63,9 @@ import org.koin.compose.koinInject
 fun GalleryScreen(onItemClick: (Long) -> Unit) {
     val viewModel: GalleryViewModel = koinViewModel()
     val imageLoader: ImageLoader = koinInject()
+    val workInfos by viewModel.workInfoStateFlow.collectAsState()
+    val isLoadingPhotos = workInfos.any { it.state == WorkInfo.State.RUNNING }
+
     LogManager.d(message = "rendering gallery screen")
     var workedStarted by rememberSaveable { mutableStateOf(false) }
     if (workedStarted.not()) {
@@ -87,7 +94,8 @@ fun GalleryScreen(onItemClick: (Long) -> Unit) {
                     columns = getColumnCount(),
                     spacing = 8.dp,
                     imageLoader = imageLoader,
-                    onItemClick = onItemClick // Pass this down
+                    onItemClick = onItemClick,
+                    isLoadingPhotos = isLoadingPhotos
                 )
             }
         }
@@ -110,6 +118,7 @@ fun CameraImageGrid(
     modifier: Modifier = Modifier,
     columns: Int,
     spacing: Dp,
+    isLoadingPhotos: Boolean,
     onItemClick: (Long) -> Unit
 ) {
     val lazyPagingItems = imagesFlow.collectAsLazyPagingItems()
@@ -125,7 +134,8 @@ fun CameraImageGrid(
             imageLoader = imageLoader,
             columns = columns,
             spacing = spacing,
-            onItemClick = onItemClick // <- Pass down
+            onItemClick = onItemClick,
+            isLoadingPhotos = isLoadingPhotos
         )
     }
 }
@@ -138,29 +148,35 @@ private fun LoadStateContent(
     imageLoader: ImageLoader,
     columns: Int,
     spacing: Dp,
-    onItemClick: (Long) -> Unit
-) {
-    when {
-        refreshState is LoadState.Loading && lazyPagingItems.itemCount == 0 -> {
-            // Show loading only when no items are loaded initially
-            AppCircularProgressIndicator()
-            LogManager.d("CameraImageGrid", "Refresh state: Loading, no items")
-        }
+    isLoadingPhotos: Boolean,
+    onItemClick: (Long) -> Unit,
 
-        refreshState is LoadState.Error -> {
-            ErrorMessage(error = refreshState.error)
-            LogManager.e("CameraImageGrid", "Refresh error", refreshState.error)
-        }
+    ) {
+    if (isLoadingPhotos && lazyPagingItems.itemCount == 0) {
+        AppCircularProgressIndicator()
+    } else {
+        when {
+            refreshState is LoadState.Loading && lazyPagingItems.itemCount == 0 -> {
+                AppCircularProgressIndicator()
+                LogManager.d("CameraImageGrid", "Refresh state: Loading, no items")
+            }
 
-        else -> {
-            ImageGridContent(
-                lazyPagingItems = lazyPagingItems,
-                imageLoader = imageLoader,
-                columns = columns,
-                spacing = spacing,
-                appendState = appendState,
-                onItemClick
-            )
+            refreshState is LoadState.Error -> {
+                ErrorMessage(error = refreshState.error)
+                LogManager.e("CameraImageGrid", "Refresh error", refreshState.error)
+            }
+
+            else -> {
+                ImageGridContent(
+                    lazyPagingItems = lazyPagingItems,
+                    imageLoader = imageLoader,
+                    columns = columns,
+                    spacing = spacing,
+                    appendState = appendState,
+                    onItemClick = onItemClick,
+                    isLoadingPhotos = isLoadingPhotos
+                )
+            }
         }
     }
 }
@@ -187,6 +203,7 @@ private fun ImageGridContent(
     columns: Int,
     spacing: Dp,
     appendState: LoadState,
+    isLoadingPhotos: Boolean,
     onItemClick: (Long) -> Unit
 ) {
     val imageSize = calculateImageSize(columns, spacing)
@@ -206,7 +223,7 @@ private fun ImageGridContent(
                 UserImageItem(image, imageSize, imageLoader, onClick = onItemClick)
             }
         }
-        appendStateContent(appendState)
+        appendStateContent(appendState, isLoadingPhotos)
     }
 }
 
@@ -228,15 +245,43 @@ private fun calculateImageSize(columns: Int, spacing: Dp): Dp {
     return with(density) { imageSizePx.toDp() }
 }
 
-private fun LazyGridScope.appendStateContent(appendState: LoadState) {
-    when (appendState) {
-        is LoadState.Loading -> {
+@Composable
+fun GridItemLoader(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .aspectRatio(1f)
+            .wrapContentSize(Alignment.Center)
+            .padding(8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(
+            color = Color.White,
+            strokeWidth = 4.dp,
+            modifier = Modifier.size(32.dp)
+        )
+    }
+}
+
+private fun LazyGridScope.appendStateContent(
+    appendState: LoadState,
+    isLoadingPhotos: Boolean,
+) {
+    when {
+        isLoadingPhotos -> {
             item {
-                AppCircularProgressIndicator()
-                LogManager.d("CameraImageGrid", "Append state: Loading")
+                GridItemLoader()
+                LogManager.d("CameraImageGrid", "Append state: Loading from WorkManager")
             }
         }
-        is LoadState.Error -> {
+
+        appendState is LoadState.Loading -> {
+            item {
+                GridItemLoader()
+                LogManager.d("CameraImageGrid", "Append state: Paging Loading")
+            }
+        }
+
+        appendState is LoadState.Error -> {
             item {
                 Text(
                     text = "Error loading more: ${appendState.error.message}",

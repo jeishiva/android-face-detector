@@ -31,6 +31,7 @@ class CameraImageWorker(
             processor.processAllImages()
             Result.success()
         } catch (e: Exception) {
+            e.printStackTrace()
             LogManager.e(message = "CameraImageWorker failed: ${e.message}")
             Result.failure()
         }

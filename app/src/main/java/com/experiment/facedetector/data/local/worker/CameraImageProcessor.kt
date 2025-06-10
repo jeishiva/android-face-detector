@@ -37,6 +37,10 @@ class CameraImageProcessor(
         var page = 0
         while (true) {
             val images = queryCameraImages(pageSize, page * pageSize)
+            if (images.isEmpty()) {
+                LogManager.d("CameraImageProcessor", "No more images to process.")
+                break // ensure to stop here
+            }
             val allIds = images.map { it.mediaId }
             val existingIds = mediaDao.getExistingMediaIds(allIds)
             val missingImages = images.filterNot { it.mediaId in existingIds }
@@ -45,7 +49,8 @@ class CameraImageProcessor(
                 try {
                     val faceImage = faceDetectionProcessor.processImage(image)
                     if (faceImage.faces.isNotEmpty()) {
-                        val result = imageHelper.drawFaceBoundingBoxes(faceImage.thumbnail, faceImage.faces)
+                        val result =
+                            imageHelper.drawFaceBoundingBoxes(faceImage.thumbnail, faceImage.faces)
                         BitmapPool.put(faceImage.thumbnail)
                         saveFaceImageAndThumbnail(faceImage.copy(thumbnail = result))?.let {
                             mediaEntityList.add(it)

@@ -75,7 +75,6 @@ fun FullImageScreen() {
             when (val result = fullImageResult.value) {
                 null -> AppCircularProgressIndicator()
                 else -> {
-
                     FullImageWithFaceOverlay(
                         bitmap = result.imageContent,
                         faceTags = result.faces,
