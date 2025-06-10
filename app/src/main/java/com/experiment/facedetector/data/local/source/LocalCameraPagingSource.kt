@@ -4,27 +4,27 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.experiment.facedetector.common.LogManager
 import com.experiment.facedetector.data.local.dao.MediaDao
-import com.experiment.facedetector.domain.entities.FaceMediaGridItem
+import com.experiment.facedetector.domain.entities.ProcessedMediaItem
 import java.io.File
 
 class LocalCameraPagingSource(
     private val mediaDao: MediaDao,
-) : PagingSource<Int, FaceMediaGridItem>() {
+) : PagingSource<Int, ProcessedMediaItem>() {
 
-    override fun getRefreshKey(state: PagingState<Int, FaceMediaGridItem>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, ProcessedMediaItem>): Int? {
         val anchorPosition = state.anchorPosition ?: return null
         val page = state.closestPageToPosition(anchorPosition)
         return page?.prevKey?.plus(1) ?: page?.nextKey?.minus(1)
     }
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, FaceMediaGridItem> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, ProcessedMediaItem> {
         return try {
             val page = params.key ?: 0
             val pageSize = params.loadSize
             val offset = page * pageSize
             val mediaEntities = mediaDao.getPagedMedia(pageSize, offset)
             val faceImages = mediaEntities.map { entity ->
-                FaceMediaGridItem(
+                ProcessedMediaItem(
                     mediaId = entity.mediaId,
                     file = File(entity.thumbnailUri)
                 ) .also {

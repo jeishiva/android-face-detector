@@ -16,7 +16,7 @@ import com.experiment.facedetector.common.LogManager
 import com.experiment.facedetector.data.local.dao.MediaDao
 import com.experiment.facedetector.data.local.entities.MediaEntity
 import com.experiment.facedetector.data.local.worker.CameraImageWorker
-import com.experiment.facedetector.domain.entities.FaceMediaGridItem
+import com.experiment.facedetector.domain.entities.ProcessedMediaItem
 import com.experiment.facedetector.repo.FaceMediaRepo
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,7 +60,7 @@ class GalleryViewModel(
         )
     }
 
-    val userImageFlow: Flow<PagingData<FaceMediaGridItem>> = Pager(
+    val userImageFlow: Flow<PagingData<ProcessedMediaItem>> = Pager(
         config = PagingConfig(
             pageSize = PAGE_SIZE,
             enablePlaceholders = true,
@@ -71,7 +71,7 @@ class GalleryViewModel(
     }.flow
         .map { pagingData: PagingData<MediaEntity> ->
             pagingData.map { mediaEntity ->
-                FaceMediaGridItem(
+                ProcessedMediaItem(
                     mediaId = mediaEntity.mediaId,
                     file = File(mediaEntity.thumbnailUri)
                 )

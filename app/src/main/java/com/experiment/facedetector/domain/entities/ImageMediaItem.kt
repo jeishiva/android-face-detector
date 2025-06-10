@@ -6,23 +6,35 @@ import com.experiment.facedetector.data.local.entities.FaceEntity
 import com.google.mlkit.vision.face.Face
 import java.io.File
 
-data class MediaItem(
+/**
+ *  from gallery
+ */
+data class ImageMediaItem(
     val mediaId: Long,
     val contentUri: Uri,
 )
 
-data class FaceMediaItem(
-    val userImage: MediaItem,
+/**
+ *  faces detected in image
+ */
+data class FaceDetectedItem(
+    val mediaItem: ImageMediaItem,
     val faces: List<Face>,
     val thumbnail: Bitmap,
 )
 
-data class FaceMediaGridItem(
+/**
+ *  processed and locally saved
+ */
+data class ProcessedMediaItem(
     val mediaId: Long,
     val file : File
 )
 
-data class FaceImageResult(
+/*
+ *  used in FullImageScreen
+ */
+data class FullImageWithFaces(
     val mediaId: Long,
     val imageContent: Bitmap,
     val faces: List<FaceTag>

@@ -6,7 +6,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.experiment.facedetector.data.local.dao.MediaDao
 import com.experiment.facedetector.data.local.source.LocalCameraPagingSource
-import com.experiment.facedetector.domain.entities.FaceMediaGridItem
+import com.experiment.facedetector.domain.entities.ProcessedMediaItem
 import kotlinx.coroutines.flow.Flow
 
 class FaceMediaRepo(
@@ -15,7 +15,7 @@ class FaceMediaRepo(
 ) {
     private var currentPagingSource: LocalCameraPagingSource? = null
 
-    fun getUserImageStream(pageSize: Int): Flow<PagingData<FaceMediaGridItem>> {
+    fun getUserImageStream(pageSize: Int): Flow<PagingData<ProcessedMediaItem>> {
         return Pager(
             config = PagingConfig(pageSize = pageSize), pagingSourceFactory = {
                 currentPagingSource = LocalCameraPagingSource(mediaDao)

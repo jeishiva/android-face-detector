@@ -24,12 +24,6 @@ class ImageCoordinateHelper(
         return mappedX to mappedY
     }
 
-    fun containerToImageCoords(x: Float, y: Float): Pair<Float, Float> {
-        val originalX = (x - offsetX) / scale
-        val originalY = (y - offsetY) / scale
-        return originalX to originalY
-    }
-
     fun scaleWidth(width: Float): Float = width * scale
     fun scaleHeight(height: Float): Float = height * scale
 }
