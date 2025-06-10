@@ -55,7 +55,6 @@ fun FullImageScreen() {
     val fullImageResult = viewModel.fullImageResult.collectAsState()
     var editingFaceId by remember { mutableStateOf<String?>(null) }
     var currentInput by remember { mutableStateOf("") }
-    var faceTags by remember { mutableStateOf(fullImageResult.value?.faces) }
 
     Scaffold(
         topBar = {
@@ -81,13 +80,9 @@ fun FullImageScreen() {
                         bitmap = result.imageContent,
                         faceTags = result.faces,
                         editingFaceId = editingFaceId,
-                        currentInput = currentInput,
                         onFaceClick = { face ->
                             editingFaceId = face.id
                             currentInput = face.tag
-                        },
-                        onInputChange = { newText ->
-                            currentInput = newText
                         },
                         onTagChanged = { face, newTag ->
                             editingFaceId = null
@@ -105,9 +100,7 @@ fun FullImageWithFaceOverlay(
     bitmap: Bitmap,
     faceTags: List<FaceTag>,
     editingFaceId: String?,
-    currentInput: String,
     onFaceClick: (FaceTag) -> Unit,
-    onInputChange: (String) -> Unit,
     onTagChanged: (FaceTag, String) -> Unit
 ) {
     val imageBitmap = bitmap.asImageBitmap()
