@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.properties.Delegates
 
 class FullImageViewModel(
     savedStateHandle: SavedStateHandle,
@@ -26,18 +27,20 @@ class FullImageViewModel(
 ) : ViewModel() {
     private val _fullImageResult = MutableStateFlow<FullImageWithFaces?>(null)
     val fullImageResult: StateFlow<FullImageWithFaces?> = _fullImageResult
+    private val mediaId : Long = savedStateHandle["mediaId"] ?: error("Missing mediaId")
 
     init {
-        init(savedStateHandle)
+        init()
     }
 
-    fun init(savedStateHandle: SavedStateHandle) {
-        val mediaId: Long = savedStateHandle["mediaId"] ?: error("Missing mediaId")
+    fun init() {
         viewModelScope.launch(Dispatchers.IO) {
             val mediaEntity = mediaRepo.getMedia(mediaId)
             val savedFaceTags = mediaRepo.getFaces(mediaId)
-            val bitmap = imageHelper.decodeBitmap(mediaEntity.contentUri.toUri(), FullImageConfig.MAX_HEIGHT,
-                FullImageConfig.MAX_WIDTH)
+            val bitmap = imageHelper.decodeBitmap(
+                mediaEntity.contentUri.toUri(), FullImageConfig.MAX_HEIGHT,
+                FullImageConfig.MAX_WIDTH
+            )
             val faces = faceDetectionProcessor.detectFaces(bitmap)
             val faceTags = faces.map {
                 val faceId = it.toFaceId(mediaId)
@@ -59,7 +62,7 @@ class FullImageViewModel(
         }
     }
 
-    fun saveFaceTag(mediaId: Long, faceTag: FaceTag, newTag: String) {
+    fun saveFaceTag(faceTag: FaceTag, newTag: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val updatedFaceEntity = faceTag.savedFaceEntity?.copy(tag = newTag)
                 ?: FaceEntity(

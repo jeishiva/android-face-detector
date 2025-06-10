@@ -18,7 +18,6 @@ import com.experiment.facedetector.data.local.dao.MediaDao
 import com.experiment.facedetector.data.local.entities.MediaEntity
 import com.experiment.facedetector.data.local.worker.CameraImageWorker
 import com.experiment.facedetector.domain.entities.ProcessedMediaItem
-import com.experiment.facedetector.repo.ProcessedMediaRepo
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +25,6 @@ import kotlinx.coroutines.flow.map
 import java.io.File
 
 class GalleryViewModel(
-    private val repository: ProcessedMediaRepo,
     private val mediaDao: MediaDao,
     private val workManager: WorkManager
 ) : ViewModel() {
@@ -49,7 +47,6 @@ class GalleryViewModel(
             .launchIn(viewModelScope)
     }
 
-
     fun startInitialWork() {
         val workRequest = OneTimeWorkRequestBuilder<CameraImageWorker>()
             .addTag(CAMERA_WORKER_TAG)
@@ -68,7 +65,7 @@ class GalleryViewModel(
             initialLoadSize = INITIAL_LOAD_SIZE
         )
     ) {
-        mediaDao.getPagedMedia2()
+        mediaDao.getPagedMedia()
     }.flow
         .map { pagingData: PagingData<MediaEntity> ->
             pagingData.map { mediaEntity ->
@@ -79,6 +76,7 @@ class GalleryViewModel(
             }
         }
         .cachedIn(viewModelScope)
+
     companion object {
         const val PAGE_SIZE = 10
         const val INITIAL_LOAD_SIZE = 10

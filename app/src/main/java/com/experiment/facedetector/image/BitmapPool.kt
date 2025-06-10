@@ -21,17 +21,20 @@ object BitmapPool {
             return try {
                 if (value.isRecycled) 0 else value.byteCount
             } catch (e: Exception) {
+                LogManager.e("BitmapPool", "size error in bitmap")
                 0
             }
         }
     }
 
-
     fun get(width: Int, height: Int, config: Bitmap.Config): Bitmap {
         val key = "$width-$height-${config.name}"
-        return pool.remove(key) ?: createBitmap(width, height, config)
+        val existing =  pool.remove(key)
+        if (existing != null) {
+            LogManager.d("BitmapPool", "reusing bitmap $key")
+        }
+        return existing ?: createBitmap(width, height, config)
     }
-
 
     fun put(bitmap: Bitmap) {
         if (bitmap.isRecycled) {

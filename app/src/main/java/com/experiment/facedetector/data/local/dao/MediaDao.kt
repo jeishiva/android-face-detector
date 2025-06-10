@@ -14,10 +14,10 @@ interface MediaDao {
     fun getAllMedia(): PagingSource<Int, MediaEntity>
 
     @Query("SELECT * FROM media ORDER BY mediaId DESC LIMIT :limit OFFSET :offset")
-    suspend fun getPagedMedia(limit: Int, offset: Int): List<MediaEntity>
+    suspend fun getPagedMediaWithOffset(limit: Int, offset: Int): List<MediaEntity>
 
     @Query("SELECT * FROM media ORDER BY mediaId DESC")
-    fun getPagedMedia2(): PagingSource<Int, MediaEntity>
+    fun getPagedMedia(): PagingSource<Int, MediaEntity>
 
     @Query("SELECT * FROM media WHERE mediaId = :id")
     suspend fun getMediaEntityById(id: Long): MediaEntity

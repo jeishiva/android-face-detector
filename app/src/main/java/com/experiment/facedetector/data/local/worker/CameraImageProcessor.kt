@@ -186,10 +186,29 @@ class CameraImageProcessor(
             MediaStore.Images.Media._ID,
             MediaStore.Images.Media.RELATIVE_PATH
         )
+        val queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        val cursor = context.contentResolver.query(
+            queryUri,
+            projection,
+            getQueryArgs(limit, offset),
+            null
+        )
+        cursor?.use {
+            val idCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+            while (cursor.moveToNext()) {
+                val id = cursor.getLong(idCol)
+                val contentUri = ContentUris.withAppendedId(queryUri, id)
+                images.add(MediaItem(mediaId = id, contentUri = contentUri))
+                LogManager.d(message = "Camera Image: ID=$id, Path=$contentUri")
+            }
+        }
+        return images
+    }
+
+    fun getQueryArgs(limit: Int, offset: Int): Bundle {
         val selection = "${MediaStore.Images.Media.RELATIVE_PATH} LIKE ?"
         val selectionArgs = arrayOf("%DCIM/Camera%")
-        val queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-        val queryArgs = Bundle().apply {
+        return Bundle().apply {
             putString(ContentResolver.QUERY_ARG_SQL_SELECTION, selection)
             putStringArray(ContentResolver.QUERY_ARG_SQL_SELECTION_ARGS, selectionArgs)
             putStringArray(
@@ -203,22 +222,6 @@ class CameraImageProcessor(
             putInt(ContentResolver.QUERY_ARG_LIMIT, limit)
             putInt(ContentResolver.QUERY_ARG_OFFSET, offset)
         }
-        val cursor = context.contentResolver.query(
-            queryUri,
-            projection,
-            queryArgs,
-            null
-        )
-        cursor?.use {
-            val idCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
-            while (cursor.moveToNext()) {
-                val id = cursor.getLong(idCol)
-                val contentUri = ContentUris.withAppendedId(queryUri, id)
-                images.add(MediaItem(mediaId = id, contentUri = contentUri))
-                LogManager.d(message = "Camera Image: ID=$id, Path=$contentUri")
-            }
-        }
-        return images
     }
 }
 

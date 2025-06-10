@@ -10,7 +10,6 @@ import org.koin.dsl.module
 
 val viewModelModule = module {
     viewModel { GalleryViewModel(
-        repository = get(),
         mediaDao = get(),
         workManager = get()
     ) }

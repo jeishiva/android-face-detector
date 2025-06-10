@@ -22,7 +22,7 @@ class LocalCameraPagingSource(
             val page = params.key ?: 0
             val pageSize = params.loadSize
             val offset = page * pageSize
-            val mediaEntities = mediaDao.getPagedMedia(pageSize, offset)
+            val mediaEntities = mediaDao.getPagedMediaWithOffset(pageSize, offset)
             val faceImages = mediaEntities.map { entity ->
                 ProcessedMediaItem(
                     mediaId = entity.mediaId,
