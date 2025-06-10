@@ -12,22 +12,30 @@ import com.experiment.facedetector.ui.screen.SplashScreen
 
 @Composable
 fun AppNavGraph(navController: NavHostController) {
-    NavHost(navController, startDestination = "splash") {
-        composable("splash") {
+    NavHost(navController, startDestination = AppRoute.Splash.route) {
+        composable(AppRoute.Splash.route) {
             SplashScreen(navController)
         }
-        composable("gallery") {
+
+        composable(AppRoute.Gallery.route) {
             GalleryScreen(
-                navController,
-                onItemClick = { mediaId ->
-                    navController.navigate("fullImage/$mediaId")
-                })
+                navController = navController
+            )
         }
         composable(
-            route = "fullImage/{mediaId}",
+            route = AppRoute.FullImage.route,
             arguments = listOf(navArgument("mediaId") { type = NavType.LongType })
         ) {
             FullImageScreen(navController)
         }
+    }
+}
+
+
+sealed class AppRoute(val route: String) {
+    object Splash : AppRoute("splash")
+    object Gallery : AppRoute("gallery")
+    object FullImage : AppRoute("fullImage/{mediaId}") {
+        fun createRoute(mediaId: Long): String = "fullImage/$mediaId"
     }
 }

@@ -51,6 +51,7 @@ import androidx.work.WorkInfo
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.experiment.facedetector.AppRoute
 import com.experiment.facedetector.common.LogManager
 import com.experiment.facedetector.domain.entities.MediaGridItem
 import com.experiment.facedetector.ui.theme.AndroidFaceDetectorTheme
@@ -63,7 +64,7 @@ import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GalleryScreen(navController: NavHostController, onItemClick: (Long) -> Unit) {
+fun GalleryScreen(navController: NavHostController) {
     val viewModel: GalleryViewModel = koinViewModel()
     val imageLoader: ImageLoader = koinInject()
     val workInfos by viewModel.workInfoStateFlow.collectAsState()
@@ -100,7 +101,9 @@ fun GalleryScreen(navController: NavHostController, onItemClick: (Long) -> Unit)
                     columns = getColumnCount(),
                     spacing = 8.dp,
                     imageLoader = imageLoader,
-                    onItemClick = onItemClick,
+                    onItemClick = { mediaId ->
+                        navController.navigate(AppRoute.FullImage.createRoute(mediaId))
+                    },
                     isLoadingPhotos = isLoadingPhotos
                 )
             }

@@ -32,6 +32,7 @@ import com.experiment.facedetector.common.RequestPermission
 import com.experiment.facedetector.ui.theme.AndroidFaceDetectorTheme
 import android.provider.Settings
 import androidx.navigation.NavHostController
+import com.experiment.facedetector.AppRoute
 import com.experiment.facedetector.viewmodel.SplashViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -62,8 +63,8 @@ fun SplashScreen(navController: NavHostController) {
                     onPermissionResult = { granted ->
                         permissionGranted = granted
                         if (granted) {
-                            navController.navigate("gallery") {
-                                popUpTo("splash") {
+                            navController.navigate(AppRoute.Gallery.route) {
+                                popUpTo(AppRoute.Splash.route) {
                                     inclusive = true
                                 }
                             }
