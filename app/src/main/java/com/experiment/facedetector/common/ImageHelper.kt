@@ -74,15 +74,10 @@ class ImageHelper(val context: Context) {
         targetHeight: Int,
         targetWidth: Int
     ): Bitmap {
-        // Open a single BufferedInputStream for all operations
         context.contentResolver.openInputStream(contentUri)?.let { inputStream ->
             BufferedInputStream(inputStream, 8192).use { bufferedStream ->
-                // Ensure stream supports mark/reset for multiple reads
                 bufferedStream.mark(Int.MAX_VALUE)
-
-                // Step 1: Get rotation
                 val rotationDegrees = getImageRotation(bufferedStream)
-
                 // Step 2: Get dimensions
                 val (originalWidth, originalHeight) = getImageDimensions(bufferedStream)
 
@@ -150,7 +145,8 @@ class ImageHelper(val context: Context) {
         inputStream.reset()
         return options.outWidth to options.outHeight
     }
-    private fun createThumbnail(bitmap: Bitmap, maxSize: Int): Bitmap {
+
+    fun createThumbnail(bitmap: Bitmap, maxSize: Int): Bitmap {
         val scale = maxSize.toFloat() / max(bitmap.width, bitmap.height)
         val width = (bitmap.width * scale).toInt()
         val height = (bitmap.height * scale).toInt()
