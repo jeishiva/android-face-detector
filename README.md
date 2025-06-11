@@ -1,5 +1,4 @@
-# android-face-detector
-
+# Photo Finder
 ## 📱 App Overview
 
 This app provides a smart and efficient way to manage user-captured camera images by automatically detecting faces, generating thumbnails, and allowing face tagging. It uses modern Android development practices and leverages key Jetpack and ML components for a clean, responsive, and optimized experience.
