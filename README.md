@@ -1,4 +1,4 @@
-# android-face-detector
+# Photo Finder
 
 ## 📱 App Overview
 
