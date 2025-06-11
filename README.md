@@ -1,9 +1,5 @@
 # android-face-detector
 
-Here is a more professional, structured, and polished version of your app description, with some additions and clarifications:
-
----
-
 ## 📱 App Overview
 
 This app provides a smart and efficient way to manage user-captured camera images by automatically detecting faces, generating thumbnails, and allowing face tagging. It uses modern Android development practices and leverages key Jetpack and ML components for a clean, responsive, and optimized experience.
