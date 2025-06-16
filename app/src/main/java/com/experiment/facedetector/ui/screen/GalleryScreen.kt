@@ -380,8 +380,9 @@ fun UserImageItem(
     modifier: Modifier = Modifier,
     onClick: (Long) -> Unit = {}
 ) {
+    val imageRequest = rememberImageRequest(image)
     AsyncImage(
-        model = createImageRequest(image),
+        model = imageRequest,
         contentDescription = "Image with ID ${image.mediaId} from camera",
         modifier = modifier
             .size(size)
@@ -394,7 +395,7 @@ fun UserImageItem(
 }
 
 @Composable
-private fun createImageRequest(image: ProcessedMediaItem): ImageRequest {
+private fun rememberImageRequest(image: ProcessedMediaItem): ImageRequest {
     return ImageRequest.Builder(LocalContext.current)
         .data(image.file)
         .diskCachePolicy(CachePolicy.DISABLED)
