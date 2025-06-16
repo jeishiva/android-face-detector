@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -11,9 +12,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -36,12 +39,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.unit.Density
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.experiment.facedetector.R
+import com.experiment.facedetector.common.LogManager
 import com.experiment.facedetector.domain.entities.FaceTag
 import com.experiment.facedetector.domain.entities.FullImageWithFaces
 import com.experiment.facedetector.image.ImageCoordinateHelper
@@ -51,7 +56,7 @@ import com.experiment.facedetector.ui.widgets.AppFullScreenImage
 import com.experiment.facedetector.viewmodel.FullImageViewModel
 import org.koin.androidx.compose.koinViewModel
 
-// Main Screen Component
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FullImageScreen(navController: NavHostController) {
@@ -123,7 +128,6 @@ private fun FullImageContent(
     }
 }
 
-// Image with Face Overlays Component
 @Composable
 fun FullImageWithFaceOverlay(
     bitmap: Bitmap,
@@ -139,23 +143,39 @@ fun FullImageWithFaceOverlay(
         val containerWidthPx = with(density) { this@BoxWithConstraints.maxWidth.toPx() }
         val containerHeightPx = with(density) { this@BoxWithConstraints.maxHeight.toPx() }
 
-        val coordinateHelper = remember(containerWidthPx, containerHeightPx, bitmap.width, bitmap.height) {
-            ImageCoordinateHelper(
-                containerWidthPx,
-                containerHeightPx,
-                bitmap.width.toFloat(),
-                bitmap.height.toFloat()
-            )
-        }
+        val coordinateHelper =
+            remember(containerWidthPx, containerHeightPx, bitmap.width, bitmap.height) {
+                ImageCoordinateHelper(
+                    containerWidthPx,
+                    containerHeightPx,
+                    bitmap.width.toFloat(),
+                    bitmap.height.toFloat()
+                )
+            }
 
         AppFullScreenImage(imageBitmap)
 
         faceTags.forEach { face ->
             key(face.id) {
+                val (leftPx, topPx) = coordinateHelper.imageToContainerCoords(
+                    face.left.toFloat(),
+                    face.top.toFloat()
+                )
+                val widthPx = coordinateHelper.scaleWidth(face.width.toFloat())
+                val heightPx = coordinateHelper.scaleHeight(face.height.toFloat())
+
+                val coordinates = with(density) {
+                    FaceTagCoordinates(
+                        left = leftPx.toDp(),
+                        top = topPx.toDp(),
+                        width = widthPx.toDp(),
+                        height = heightPx.toDp()
+                    )
+                }
+
                 FaceTagItem(
                     face = face,
-                    coordinateHelper = coordinateHelper,
-                    density = density,
+                    coordinates = coordinates,
                     isEditing = editingFaceId == face.id,
                     onFaceClick = onFaceClick,
                     onTagChanged = onTagChanged
@@ -169,34 +189,29 @@ fun FullImageWithFaceOverlay(
 @Composable
 private fun FaceTagItem(
     face: FaceTag,
-    coordinateHelper: ImageCoordinateHelper,
-    density: Density,
+    coordinates: FaceTagCoordinates,
     isEditing: Boolean,
     onFaceClick: (FaceTag) -> Unit,
     onTagChanged: (FaceTag, String) -> Unit
 ) {
-    val (left, top) = coordinateHelper.imageToContainerCoords(face.left.toFloat(), face.top.toFloat())
-    val width = coordinateHelper.scaleWidth(face.width.toFloat())
-    val height = coordinateHelper.scaleHeight(face.height.toFloat())
-
     Column(
         modifier = Modifier.absoluteOffset(
-            x = with(density) { left.toDp() },
-            y = with(density) { top.toDp() }
+            x = coordinates.left,
+            y = coordinates.top
         ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         FaceBox(
-            width = width,
-            height = height,
-            density = density,
+            width = coordinates.width,
+            height = coordinates.height,
+            isEditing = isEditing,
             onClick = { onFaceClick(face) }
         ) {
             if (isEditing) {
                 Box(
                     modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
+                        .width(coordinates.width)
+                        .height(coordinates.height)
                 ) {
                     EditableTagInput(
                         initialTag = face.tag,
@@ -206,7 +221,10 @@ private fun FaceTagItem(
             }
         }
         if (face.tag.isNotEmpty() && !isEditing) {
-            StaticTagDisplay(tag = face.tag)
+            StaticTagDisplay(
+                tag = face.tag,
+                maxWidth = coordinates.width
+            )
         }
     }
 }
@@ -214,17 +232,17 @@ private fun FaceTagItem(
 // Face Box Component
 @Composable
 private fun FaceBox(
-    width: Float,
-    height: Float,
-    density: Density,
+    width: Dp,
+    height: Dp,
+    isEditing: Boolean,
     onClick: () -> Unit,
     content: @Composable BoxScope.() -> Unit
 ) {
     Box(
         modifier = Modifier
-            .size(
-                width = with(density) { width.toDp() },
-                height = with(density) { height.toDp() }
+            .size(width = width, height = height)
+            .background(
+                color = if (isEditing) Color(0x40808080) else Color.Transparent
             )
             .border(2.dp, Color.Cyan)
             .clickable(onClick = onClick),
@@ -244,8 +262,12 @@ private fun EditableTagInput(
         onValueChange = { tagText = it },
         singleLine = true,
         modifier = Modifier
-            .padding(2.dp),
-        textStyle = MaterialTheme.typography.labelLarge,
+            .fillMaxSize()
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) { /* Consume click to prevent propagation to parent */ },
+        textStyle = MaterialTheme.typography.labelMedium,
         colors = TextFieldDefaults.colors(
             focusedContainerColor = Color(0x80000000),
             unfocusedContainerColor = Color(0x80000000),
@@ -260,17 +282,28 @@ private fun EditableTagInput(
 }
 
 @Composable
-fun StaticTagDisplay(tag: String) {
+fun StaticTagDisplay(
+    tag: String,
+    maxWidth: Dp
+) {
     Text(
         text = tag,
-        style = MaterialTheme.typography.labelLarge,
-        fontWeight = FontWeight.Bold,
+        style = MaterialTheme.typography.bodySmall.copy(
+            fontSize = 10.sp
+        ),
         color = Color.White,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
         modifier = Modifier
+            .widthIn(max = maxWidth)
             .background(Color(0x80000000), shape = RoundedCornerShape(8.dp))
             .padding(horizontal = 6.dp, vertical = 2.dp)
     )
 }
 
-
-
+data class FaceTagCoordinates(
+    val left: Dp,
+    val top: Dp,
+    val width: Dp,
+    val height: Dp
+)
