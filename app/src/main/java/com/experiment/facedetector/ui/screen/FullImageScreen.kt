@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -184,7 +186,6 @@ private fun FaceTagItem(
             x = with(density) { left.toDp() },
             y = with(density) { top.toDp() }
         ),
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         FaceBox(
             width = width,
@@ -195,8 +196,8 @@ private fun FaceTagItem(
             if (isEditing) {
                 Box(
                     modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
+                        .width(with(density) { width.toDp() })
+                        .height(height.dp)
                 ) {
                     EditableTagInput(
                         initialTag = face.tag,
@@ -242,9 +243,6 @@ private fun EditableTagInput(
     TextField(
         value = tagText,
         onValueChange = { tagText = it },
-        singleLine = true,
-        modifier = Modifier
-            .padding(2.dp),
         textStyle = MaterialTheme.typography.labelLarge,
         colors = TextFieldDefaults.colors(
             focusedContainerColor = Color(0x80000000),
@@ -263,8 +261,7 @@ private fun EditableTagInput(
 fun StaticTagDisplay(tag: String) {
     Text(
         text = tag,
-        style = MaterialTheme.typography.labelLarge,
-        fontWeight = FontWeight.Bold,
+        style = MaterialTheme.typography.labelMedium,
         color = Color.White,
         modifier = Modifier
             .background(Color(0x80000000), shape = RoundedCornerShape(8.dp))
