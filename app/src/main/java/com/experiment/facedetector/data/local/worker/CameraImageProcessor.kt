@@ -33,7 +33,7 @@ class CameraImageProcessor(
     private val mediaRepo: IMediaRepo,
     private val imageHelper: BitmapHelper,
     private val pageSize: Int = 20,
-    private val concurrentLimit: Int = 3
+    private val concurrentLimit: Int = 5
 ) : ICameraProcessor {
     private val processingLimit = Semaphore(concurrentLimit)
 
@@ -42,6 +42,7 @@ class CameraImageProcessor(
         var page = 0
         var totalProcessed = 0
         var totalSaved = 0
+        val chunkSize = 5
         while (true) {
             val images = queryCameraImages(pageSize, page * pageSize)
             if (images.isEmpty()) {
@@ -52,13 +53,22 @@ class CameraImageProcessor(
                 break
             }
 
-            val pageResult = processImageBatchConcurrently(images)
-            totalProcessed += pageResult.processed
-            totalSaved += pageResult.saved
+            // Process images in chunks of 5
+            val chunks = images.chunked(chunkSize)
             LogManager.d(
                 "CameraImageProcessor",
-                "Page $page: ${pageResult.processed} processed, ${pageResult.saved} saved"
+                "Page $page: Processing ${images.size} images in ${chunks.size} chunks of $chunkSize"
             )
+
+            for ((chunkIndex, chunk) in chunks.withIndex()) {
+                val chunkResult = processImageBatchConcurrently(chunk)
+                totalProcessed += chunkResult.processed
+                totalSaved += chunkResult.saved
+                LogManager.d(
+                    "CameraImageProcessor",
+                    "Page $page, Chunk $chunkIndex: ${chunkResult.processed} processed, ${chunkResult.saved} saved"
+                )
+            }
             page++
         }
     }
