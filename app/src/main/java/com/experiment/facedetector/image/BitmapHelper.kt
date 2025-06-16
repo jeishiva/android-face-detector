@@ -191,4 +191,37 @@ class BitmapHelper(val context: Context) {
             source.scale(targetWidth, targetHeight)
         }
     }
+    fun drawFaceBoundingBoxesOnThumbnail(
+        originalBitmap: Bitmap,
+        faces: List<Face>,
+        thumbnailSize: Int = 200
+    ): Bitmap {
+        if (faces.isEmpty()) {
+            return originalBitmap.scale(thumbnailSize, thumbnailSize)
+        }
+
+        val scaledBitmap = originalBitmap.scale(thumbnailSize, thumbnailSize)
+        val scaleX = thumbnailSize / originalBitmap.width.toFloat()
+        val scaleY = thumbnailSize / originalBitmap.height.toFloat()
+
+        val canvas = Canvas(scaledBitmap)
+        val paint = Paint().apply {
+            color = Color.CYAN
+            style = Paint.Style.STROKE
+            strokeWidth = 1.5f
+        }
+
+        for (face in faces) {
+            val bounds = face.boundingBox
+            val left = bounds.left * scaleX
+            val top = bounds.top * scaleY
+            val right = bounds.right * scaleX
+            val bottom = bounds.bottom * scaleY
+
+            canvas.drawRect(left, top, right, bottom, paint)
+        }
+
+        return scaledBitmap
+    }
+
 }

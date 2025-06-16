@@ -56,6 +56,7 @@ import coil.request.ImageRequest
 import com.experiment.facedetector.R
 import com.experiment.facedetector.navigation.AppRoute
 import com.experiment.facedetector.common.LogManager
+import com.experiment.facedetector.config.AppConfig
 import com.experiment.facedetector.domain.entities.ProcessedMediaItem
 import com.experiment.facedetector.ui.theme.AndroidFaceDetectorTheme
 import com.experiment.facedetector.ui.theme.MildGray
@@ -145,7 +146,11 @@ private fun GalleryContent(
 
 @Composable
 private fun getColumnCount(): Int {
-    return if (isLandscape()) 4 else 2
+    return if (isLandscape()) {
+        AppConfig.GRID_SIZE * 2
+    } else {
+        AppConfig.GRID_SIZE
+    }
 }
 
 @Composable
