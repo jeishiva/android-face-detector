@@ -52,6 +52,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.work.WorkInfo
 import coil.ImageLoader
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.experiment.facedetector.R
 import com.experiment.facedetector.navigation.AppRoute
@@ -198,7 +199,10 @@ private fun GridLoadStateHandler(
 ) {
     val refreshState = lazyPagingItems.loadState.refresh
     val appendState = lazyPagingItems.loadState.append
-
+    val debouncedAppendState by produceState(initialValue = appendState) {
+        delay(200)
+        value = appendState
+    }
     when {
         isLoadingPhotos && lazyPagingItems.itemCount == 0 -> {
             AppCircularProgressIndicator()
@@ -217,7 +221,7 @@ private fun GridLoadStateHandler(
                 imageLoader = imageLoader,
                 columns = columns,
                 spacing = spacing,
-                appendState = appendState,
+                appendState = debouncedAppendState,
                 onItemClick = onItemClick,
                 isLoadingPhotos = isLoadingPhotos
             )
@@ -251,10 +255,6 @@ private fun ImageGrid(
     onItemClick: (Long) -> Unit
 ) {
     val imageSize = calculateOptimalImageSize(columns, spacing)
-    val debouncedAppendState by produceState(initialValue = appendState) {
-        delay(250)
-        value = appendState
-    }
     LazyVerticalGrid(
         columns = GridCells.Fixed(columns),
         modifier = Modifier.fillMaxSize(),
@@ -268,7 +268,7 @@ private fun ImageGrid(
             imageLoader = imageLoader,
             onItemClick = onItemClick
         )
-        GridAppendStateContent(debouncedAppendState, isLoadingPhotos)
+        GridAppendStateContent(appendState, isLoadingPhotos)
     }
 }
 
@@ -397,7 +397,8 @@ fun UserImageItem(
 private fun createImageRequest(image: ProcessedMediaItem): ImageRequest {
     return ImageRequest.Builder(LocalContext.current)
         .data(image.file)
-        .crossfade(true)
+        .diskCachePolicy(CachePolicy.DISABLED)
+        .memoryCachePolicy(CachePolicy.ENABLED)
         .error(android.R.drawable.stat_notify_error)
         .listener(
             onError = { _, result ->
