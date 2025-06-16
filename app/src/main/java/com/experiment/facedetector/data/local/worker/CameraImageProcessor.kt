@@ -20,10 +20,11 @@ import com.experiment.facedetector.config.ThumbnailConfig
 import com.experiment.facedetector.config.ThumbnailConfig.THUMBNAIL_SIZE
 import com.experiment.facedetector.data.local.worker.entities.BatchResult
 import com.experiment.facedetector.data.local.worker.entities.ProcessedImageResult
+import com.experiment.facedetector.data.local.worker.processor.ICameraProcessor
 import com.experiment.facedetector.domain.repo.IMediaRepo
 
 /**
- * Processes camera images concurrently with configurable parallelism using Semaphore
+ * processes camera images concurrently with configurable parallelism using Semaphore
  * Queries images in batches, detects faces, creates thumbnails, and saves to database
  */
 class CameraImageProcessor(
@@ -33,10 +34,10 @@ class CameraImageProcessor(
     private val imageHelper: BitmapHelper,
     private val pageSize: Int = 20,
     private val concurrentLimit: Int = 3
-) {
+) : ICameraProcessor {
     private val processingLimit = Semaphore(concurrentLimit)
 
-    suspend fun processAllImages() = withContext(Dispatchers.IO) {
+    override suspend fun process() = withContext(Dispatchers.IO) {
         LogManager.d("CameraImageProcessor", "Starting concurrent image processing with limit: $concurrentLimit")
         var page = 0
         var totalProcessed = 0
@@ -94,12 +95,12 @@ class CameraImageProcessor(
     private suspend fun processImagesWithConcurrency(
         images: List<MediaItem>
     ): List<ProcessedImageResult> = withContext(Dispatchers.Default) {
-
         images.map { image ->
             async {
                 // Acquire semaphore to limit concurrency
                 processingLimit.acquire()
                 try {
+                    LogManager.d("CameraImageProcessor", "processing ${image.mediaId}")
                     processImageSafely(image)
                 } finally {
                     processingLimit.release()

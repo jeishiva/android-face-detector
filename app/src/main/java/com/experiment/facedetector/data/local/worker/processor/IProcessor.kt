@@ -1,4 +1,7 @@
 package com.experiment.facedetector.data.local.worker.processor
 
-class IProcessor {
+interface IProcessor {
+    suspend fun process()
 }
+
+interface ICameraProcessor : IProcessor

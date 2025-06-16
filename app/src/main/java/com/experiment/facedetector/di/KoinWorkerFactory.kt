@@ -4,17 +4,14 @@ import android.content.Context
 import androidx.work.ListenableWorker
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
-import com.experiment.facedetector.image.BitmapHelper
-import com.experiment.facedetector.face.FaceDetectionProcessor
 import com.experiment.facedetector.data.local.worker.CameraImageWorker
-import com.experiment.facedetector.domain.repo.IMediaRepo
 import org.koin.core.Koin
 
 class KoinWorkerFactory(private val koin: Koin) : WorkerFactory() {
     override fun createWorker(
         appContext: Context,
         workerClassName: String,
-        workerParameters: WorkerParameters
+        workerParameters: WorkerParameters,
     ): ListenableWorker? {
         return when (workerClassName) {
             CameraImageWorker::class.java.name -> {
@@ -27,11 +24,10 @@ class KoinWorkerFactory(private val koin: Koin) : WorkerFactory() {
         appContext: Context,
         workerParameters: WorkerParameters
     ): CameraImageWorker {
-        val processor: FaceDetectionProcessor = koin.get()
-        val mediaRepo: IMediaRepo = koin.get()
-        val imageHelper: BitmapHelper = koin.get()
-        return CameraImageWorker(appContext,
-            workerParameters,
-            processor, mediaRepo, imageHelper)
+        return CameraImageWorker(
+            context = appContext,
+            workerParams = workerParameters,
+            processor = koin.get()
+        )
     }
 }
