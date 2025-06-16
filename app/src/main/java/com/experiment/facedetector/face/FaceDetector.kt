@@ -19,7 +19,8 @@ class FaceDetectionProcessor(
     suspend fun processImage(mediaItem: MediaItem): FaceDetectedMediaItem =
         withContext(Dispatchers.IO) {
             val bitmap = imageHelper.decodeBitmap(
-                mediaItem.contentUri, FullImageConfig.MAX_HEIGHT,
+                mediaItem.contentUri,
+                FullImageConfig.MAX_HEIGHT,
                 FullImageConfig.MAX_WIDTH
             )
             val faces = detectFaces(bitmap)
@@ -30,5 +31,4 @@ class FaceDetectionProcessor(
         val inputImage = InputImage.fromBitmap(bitmap, 0)
         return faceDetector.process(inputImage).await()
     }
-
 }
