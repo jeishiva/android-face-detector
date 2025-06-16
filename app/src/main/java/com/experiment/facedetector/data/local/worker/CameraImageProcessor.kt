@@ -138,26 +138,18 @@ class CameraImageProcessor(
     private suspend fun createProcessedImageResult(
         faceImage: FaceDetectedMediaItem
     ): ProcessedImageResult? {
-        var boundingBoxBitmap: Bitmap? = null
         var thumbnailBitmap: Bitmap? = null
 
         return try {
-            // Create thumbnail
-            thumbnailBitmap = imageHelper.scaleFromPool(
-                faceImage.image,
-                THUMBNAIL_SIZE, THUMBNAIL_SIZE
-            )
-
-            boundingBoxBitmap = imageHelper.drawFaceBoundingBoxesOnThumbnail(
+            thumbnailBitmap = imageHelper.drawFaceBoundingBoxesOnThumbnail(
                 faceImage.image,
                 faceImage.faces,
                 THUMBNAIL_SIZE
             )
-
-            // Return result without saving
+            // Return result without savingun
             ProcessedImageResult(
                 mediaItem = faceImage.mediaItem,
-                thumbnailBitmap = boundingBoxBitmap,
+                thumbnailBitmap = thumbnailBitmap,
                 faces = faceImage.faces,
                 originalBitmap = faceImage.image
             )
@@ -165,7 +157,7 @@ class CameraImageProcessor(
         } catch (e: Exception) {
             LogManager.e("CameraImageProcessor", "Failed to create processed image result for ${faceImage.mediaItem.mediaId}", e)
             // Clean up on failure
-            cleanupBitmaps(faceImage.image, boundingBoxBitmap, thumbnailBitmap)
+            cleanupBitmaps(faceImage.image, thumbnailBitmap)
             null
         }
     }

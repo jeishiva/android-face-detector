@@ -16,6 +16,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import androidx.core.graphics.scale
 import com.experiment.facedetector.common.LogManager
+import com.experiment.facedetector.config.ThumbnailConfig.THUMBNAIL_SIZE
 
 class BitmapHelper(val context: Context) {
     fun saveBitmap(
@@ -191,20 +192,24 @@ class BitmapHelper(val context: Context) {
             source.scale(targetWidth, targetHeight)
         }
     }
+
     fun drawFaceBoundingBoxesOnThumbnail(
         originalBitmap: Bitmap,
         faces: List<Face>,
-        thumbnailSize: Int = 200
+        thumbnailSize: Int
     ): Bitmap {
         if (faces.isEmpty()) {
             return originalBitmap.scale(thumbnailSize, thumbnailSize)
         }
-
-        val scaledBitmap = originalBitmap.scale(thumbnailSize, thumbnailSize)
+        val thumbnail = scaleFromPool(
+            originalBitmap,
+            THUMBNAIL_SIZE,
+            THUMBNAIL_SIZE
+        )
         val scaleX = thumbnailSize / originalBitmap.width.toFloat()
         val scaleY = thumbnailSize / originalBitmap.height.toFloat()
 
-        val canvas = Canvas(scaledBitmap)
+        val canvas = Canvas(thumbnail)
         val paint = Paint().apply {
             color = Color.CYAN
             style = Paint.Style.STROKE
@@ -220,8 +225,7 @@ class BitmapHelper(val context: Context) {
 
             canvas.drawRect(left, top, right, bottom, paint)
         }
-
-        return scaledBitmap
+        return thumbnail
     }
 
 }
