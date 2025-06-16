@@ -20,7 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.experiment.facedetector.config.ThumbnailConfig
 import com.experiment.facedetector.config.ThumbnailConfig.THUMBNAIL_SIZE
-import com.experiment.facedetector.repo.MediaRepo
+import com.experiment.facedetector.domain.repo.IMediaRepo
 
 /**
  *  queries camera images in batches from local storage
@@ -33,7 +33,7 @@ class CameraImageProcessor(
     private val context: Context,
     private val pageSize: Int = 5,
     private val faceDetectionProcessor: FaceDetectionProcessor,
-    private val mediaRepo: MediaRepo,
+    private val mediaRepo: IMediaRepo,
     private val imageHelper: BitmapHelper,
 ) {
 
@@ -82,7 +82,7 @@ class CameraImageProcessor(
 
         // Batch insert all entities
         if (mediaEntities.isNotEmpty()) {
-            mediaRepo.addProcessedMedia(mediaEntities)
+            mediaRepo.insertOrUpdateMedia(mediaEntities)
         }
 
         return BatchResult(processedCount, mediaEntities.size)

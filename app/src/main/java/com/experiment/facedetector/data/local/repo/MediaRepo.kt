@@ -1,4 +1,4 @@
-package com.experiment.facedetector.repo
+package com.experiment.facedetector.data.local.repo
 
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -9,6 +9,7 @@ import com.experiment.facedetector.data.local.dao.MediaDao
 import com.experiment.facedetector.data.local.entities.FaceEntity
 import com.experiment.facedetector.data.local.entities.MediaEntity
 import com.experiment.facedetector.domain.entities.ProcessedMediaItem
+import com.experiment.facedetector.domain.repo.IMediaRepo
 import com.experiment.facedetector.viewmodel.GalleryViewModel.Companion.INITIAL_LOAD_SIZE
 import com.experiment.facedetector.viewmodel.GalleryViewModel.Companion.PAGE_SIZE
 import kotlinx.coroutines.Dispatchers
@@ -19,25 +20,21 @@ import java.io.File
 
 class MediaRepo(
     val mediaDao: MediaDao, val faceDao: FaceDao
-) {
+) : IMediaRepo {
 
-    suspend fun getMedia(mediaId: Long): MediaEntity {
+    override suspend fun getMedia(mediaId: Long): MediaEntity {
         return mediaDao.getMediaEntityById(mediaId)
     }
 
-    suspend fun getFaces(mediaId: Long): List<FaceEntity> {
-        return faceDao.getFacesForMedia(mediaId)
-    }
-
-    suspend fun addProcessedMedia(mediaList: List<MediaEntity>) {
+    override suspend fun insertOrUpdateMedia(mediaList: List<MediaEntity>) {
         mediaDao.insertMediaList(mediaList)
     }
 
-    suspend fun getExistingMediaIds(mediaIds: List<Long>): List<Long> {
+    override suspend fun getExistingMediaIds(mediaIds: List<Long>): List<Long> {
         return mediaDao.getExistingMediaIds(mediaIds)
     }
 
-    fun getPagedMedia(): Flow<PagingData<ProcessedMediaItem>> {
+    override fun getPagedMedia(): Flow<PagingData<ProcessedMediaItem>> {
         return Pager(
             config = PagingConfig(
                 pageSize = PAGE_SIZE,
@@ -55,5 +52,12 @@ class MediaRepo(
             }
         }.flowOn(Dispatchers.IO)
     }
-}
 
+    override suspend fun insertOrUpdateFace(faceEntity: FaceEntity) {
+        faceDao.insertOrUpdateFace(faceEntity)
+    }
+
+    override suspend fun getFaces(mediaId: Long): List<FaceEntity> {
+        return faceDao.getFacesForMedia(mediaId)
+    }
+}

@@ -3,11 +3,8 @@ package com.experiment.facedetector.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import androidx.paging.map
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
@@ -16,7 +13,7 @@ import com.experiment.facedetector.common.CAMERA_WORKER_TAG
 import com.experiment.facedetector.common.LogManager
 import com.experiment.facedetector.data.local.worker.CameraImageWorker
 import com.experiment.facedetector.domain.entities.ProcessedMediaItem
-import com.experiment.facedetector.repo.MediaRepo
+import com.experiment.facedetector.domain.repo.IMediaRepo
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,7 +25,7 @@ import kotlinx.coroutines.flow.StateFlow
  */
 
 class GalleryViewModel(
-    mediaRepo: MediaRepo,
+    mediaRepo: IMediaRepo,
     private val workManager: WorkManager
 ) : ViewModel() {
 

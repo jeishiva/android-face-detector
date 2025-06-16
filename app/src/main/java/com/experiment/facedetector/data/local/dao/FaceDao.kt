@@ -13,5 +13,4 @@ interface FaceDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrUpdateFace(faces: FaceEntity)
-
 }

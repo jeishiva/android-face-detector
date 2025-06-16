@@ -5,14 +5,14 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.experiment.facedetector.image.BitmapHelper
 import com.experiment.facedetector.common.LogManager
+import com.experiment.facedetector.domain.repo.IMediaRepo
 import com.experiment.facedetector.face.FaceDetectionProcessor
-import com.experiment.facedetector.repo.MediaRepo
 
 class CameraImageWorker(
     context: Context,
     workerParams: WorkerParameters,
     private val faceDetectionProcessor: FaceDetectionProcessor,
-    private val mediaRepo: MediaRepo,
+    private val mediaRepo: IMediaRepo,
     private val imageHelper: BitmapHelper
 ) : CoroutineWorker(context, workerParams) {
 
