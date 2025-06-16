@@ -226,7 +226,7 @@ private fun FaceBox(
                 width = with(density) { width.toDp() },
                 height = with(density) { height.toDp() }
             )
-            .border(2.dp, Color.Green)
+            .border(2.dp, Color.Cyan)
             .clickable(onClick = onClick),
         content = content
     )

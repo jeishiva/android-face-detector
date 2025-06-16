@@ -142,22 +142,22 @@ class CameraImageProcessor(
         var thumbnailBitmap: Bitmap? = null
 
         return try {
-            // Draw bounding boxes
-            boundingBoxBitmap = imageHelper.drawFaceBoundingBoxes(
-                faceImage.image,
-                faceImage.faces
-            )
-
             // Create thumbnail
             thumbnailBitmap = imageHelper.scaleFromPool(
-                boundingBoxBitmap,
+                faceImage.image,
                 THUMBNAIL_SIZE, THUMBNAIL_SIZE
+            )
+
+            boundingBoxBitmap = imageHelper.drawFaceBoundingBoxesOnThumbnail(
+                faceImage.image,
+                faceImage.faces,
+                THUMBNAIL_SIZE
             )
 
             // Return result without saving
             ProcessedImageResult(
                 mediaItem = faceImage.mediaItem,
-                thumbnailBitmap = thumbnailBitmap,
+                thumbnailBitmap = boundingBoxBitmap,
                 faces = faceImage.faces,
                 originalBitmap = faceImage.image
             )
