@@ -11,19 +11,18 @@ import com.experiment.facedetector.face.FaceDetectionProcessor
 import com.experiment.facedetector.data.local.entities.FaceEntity
 import com.experiment.facedetector.domain.entities.FaceTag
 import com.experiment.facedetector.domain.entities.FullImageWithFaces
-import com.experiment.facedetector.repo.MediaRepo
+import com.experiment.facedetector.domain.repo.IMediaRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.properties.Delegates
 
 class FullImageViewModel(
     savedStateHandle: SavedStateHandle,
     private val faceDetectionProcessor: FaceDetectionProcessor,
     private val imageHelper: BitmapHelper,
-    private val mediaRepo: MediaRepo,
+    private val mediaRepo: IMediaRepo,
 ) : ViewModel() {
     private val _fullImageResult = MutableStateFlow<FullImageWithFaces?>(null)
     val fullImageResult: StateFlow<FullImageWithFaces?> = _fullImageResult
@@ -70,7 +69,7 @@ class FullImageViewModel(
                     faceId = faceTag.id,
                     tag = newTag
                 )
-            mediaRepo.faceDao.insertOrUpdateFace(updatedFaceEntity)
+            mediaRepo.insertOrUpdateFace(updatedFaceEntity)
             _fullImageResult.update { current ->
                 current?.copy(
                     faces = current.faces.map {
@@ -82,8 +81,6 @@ class FullImageViewModel(
             }
         }
     }
-
-
 }
 
 
