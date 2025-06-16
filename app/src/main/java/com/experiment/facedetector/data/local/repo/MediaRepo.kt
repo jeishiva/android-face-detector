@@ -12,6 +12,7 @@ import com.experiment.facedetector.domain.entities.ProcessedMediaItem
 import com.experiment.facedetector.domain.repo.IMediaRepo
 import com.experiment.facedetector.viewmodel.GalleryViewModel.Companion.INITIAL_LOAD_SIZE
 import com.experiment.facedetector.viewmodel.GalleryViewModel.Companion.PAGE_SIZE
+import com.experiment.facedetector.viewmodel.GalleryViewModel.Companion.PREFETCH_DISTANCE
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
@@ -38,7 +39,8 @@ class MediaRepo(
         return Pager(
             config = PagingConfig(
                 pageSize = PAGE_SIZE,
-                enablePlaceholders = false,
+                enablePlaceholders = true,
+                prefetchDistance = PREFETCH_DISTANCE,
                 initialLoadSize = INITIAL_LOAD_SIZE
             )
         ) {

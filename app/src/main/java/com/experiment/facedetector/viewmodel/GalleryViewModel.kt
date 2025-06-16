@@ -72,7 +72,8 @@ class GalleryViewModel(
 
     companion object {
         const val PAGE_SIZE = 10
-        const val INITIAL_LOAD_SIZE = 10
+        const val INITIAL_LOAD_SIZE = 20
+        const val PREFETCH_DISTANCE = 10
         private const val WORK_TAG = "camera_image_work"
     }
 }
