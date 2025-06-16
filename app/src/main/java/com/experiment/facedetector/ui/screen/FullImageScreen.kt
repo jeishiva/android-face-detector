@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.experiment.facedetector.R
 import com.experiment.facedetector.domain.entities.FaceTag
@@ -291,10 +292,12 @@ fun StaticTagDisplay(
 ) {
     Text(
         text = tag,
-        style = MaterialTheme.typography.bodySmall,
+        style = MaterialTheme.typography.bodySmall.copy(
+            fontSize = 10.sp
+        ),
         color = Color.White,
         maxLines = 2,
-        textAlign = TextAlign.Center,
+        overflow = TextOverflow.Ellipsis,
         modifier = Modifier
             .widthIn(max = maxWidth)
             .background(Color(0x80000000), shape = RoundedCornerShape(8.dp))
