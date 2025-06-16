@@ -39,15 +39,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.experiment.facedetector.R
+import com.experiment.facedetector.common.LogManager
 import com.experiment.facedetector.domain.entities.FaceTag
 import com.experiment.facedetector.domain.entities.FullImageWithFaces
 import com.experiment.facedetector.image.ImageCoordinateHelper
@@ -58,7 +57,6 @@ import com.experiment.facedetector.viewmodel.FullImageViewModel
 import org.koin.androidx.compose.koinViewModel
 
 
-// Main Screen Component
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FullImageScreen(navController: NavHostController) {
@@ -130,7 +128,6 @@ private fun FullImageContent(
     }
 }
 
-// Image with Face Overlays Component
 @Composable
 fun FullImageWithFaceOverlay(
     bitmap: Bitmap,
@@ -160,7 +157,6 @@ fun FullImageWithFaceOverlay(
 
         faceTags.forEach { face ->
             key(face.id) {
-                // Convert coordinates once here
                 val (leftPx, topPx) = coordinateHelper.imageToContainerCoords(
                     face.left.toFloat(),
                     face.top.toFloat()
