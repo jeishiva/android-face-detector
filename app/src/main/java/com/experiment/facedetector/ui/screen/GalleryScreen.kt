@@ -199,10 +199,6 @@ private fun GridLoadStateHandler(
 ) {
     val refreshState = lazyPagingItems.loadState.refresh
     val appendState = lazyPagingItems.loadState.append
-    val debouncedAppendState by produceState(initialValue = appendState) {
-        delay(200)
-        value = appendState
-    }
     when {
         isLoadingPhotos && lazyPagingItems.itemCount == 0 -> {
             AppCircularProgressIndicator()
@@ -221,7 +217,7 @@ private fun GridLoadStateHandler(
                 imageLoader = imageLoader,
                 columns = columns,
                 spacing = spacing,
-                appendState = debouncedAppendState,
+                appendState = appendState,
                 onItemClick = onItemClick,
                 isLoadingPhotos = isLoadingPhotos
             )
