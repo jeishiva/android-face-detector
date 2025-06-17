@@ -2,6 +2,7 @@ package com.experiment.facedetector.ui.screen
 
 import android.app.Activity
 import android.content.res.Configuration
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,22 +14,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridScope
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -49,9 +46,8 @@ import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.work.WorkInfo
 import coil.ImageLoader
-import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.experiment.facedetector.R
@@ -59,12 +55,12 @@ import com.experiment.facedetector.navigation.AppRoute
 import com.experiment.facedetector.common.LogManager
 import com.experiment.facedetector.config.AppConfig
 import com.experiment.facedetector.domain.entities.ProcessedMediaItem
+import com.experiment.facedetector.ui.entities.MildGrayPainter
 import com.experiment.facedetector.ui.theme.AndroidFaceDetectorTheme
 import com.experiment.facedetector.ui.theme.MildGray
 import com.experiment.facedetector.ui.widgets.AppBar
 import com.experiment.facedetector.ui.widgets.AppCircularProgressIndicator
 import com.experiment.facedetector.viewmodel.GalleryViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
@@ -171,8 +167,7 @@ fun CameraImageGrid(
     onItemClick: (Long) -> Unit
 ) {
     val lazyPagingItems = imagesFlow.collectAsLazyPagingItems()
-    LogManager.d("CameraImageGrid", "Item count: ${lazyPagingItems.itemCount}")
-
+    val gridState = rememberLazyGridState()
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -183,7 +178,8 @@ fun CameraImageGrid(
             columns = columns,
             spacing = spacing,
             onItemClick = onItemClick,
-            isLoadingPhotos = isLoadingPhotos
+            isLoadingPhotos = isLoadingPhotos,
+            gridState = gridState
         )
     }
 }
@@ -196,31 +192,24 @@ private fun GridLoadStateHandler(
     spacing: Dp,
     isLoadingPhotos: Boolean,
     onItemClick: (Long) -> Unit,
+    gridState: LazyGridState
 ) {
-    val refreshState = lazyPagingItems.loadState.refresh
-    val appendState = lazyPagingItems.loadState.append
-    when {
-        isLoadingPhotos && lazyPagingItems.itemCount == 0 -> {
-            AppCircularProgressIndicator()
-        }
-        refreshState is LoadState.Loading && lazyPagingItems.itemCount == 0 -> {
-            AppCircularProgressIndicator()
-            LogManager.d("CameraImageGrid", "Refresh state: Loading, no items")
-        }
-        refreshState is LoadState.Error -> {
-            ErrorMessage(error = refreshState.error)
-            LogManager.e("CameraImageGrid", "Refresh error", refreshState.error)
-        }
-        else -> {
-            ImageGrid(
-                lazyPagingItems = lazyPagingItems,
-                imageLoader = imageLoader,
-                columns = columns,
-                spacing = spacing,
-                appendState = appendState,
-                onItemClick = onItemClick,
-                isLoadingPhotos = isLoadingPhotos
-            )
+    if (lazyPagingItems.itemCount > 0) {
+        ImageGrid(
+            lazyPagingItems = lazyPagingItems,
+            imageLoader = imageLoader,
+            columns = columns,
+            spacing = spacing,
+            appendState = lazyPagingItems.loadState.append,
+            onItemClick = onItemClick,
+            isLoadingPhotos = isLoadingPhotos,
+            gridState = gridState
+        )
+    } else {
+        when (lazyPagingItems.loadState.refresh) {
+            is LoadState.Loading -> AppCircularProgressIndicator()
+            is LoadState.Error -> ErrorMessage(error = (lazyPagingItems.loadState.refresh as LoadState.Error).error)
+            else -> {}
         }
     }
 }
@@ -248,27 +237,29 @@ private fun ImageGrid(
     spacing: Dp,
     appendState: LoadState,
     isLoadingPhotos: Boolean,
-    onItemClick: (Long) -> Unit
+    onItemClick: (Long) -> Unit,
+    gridState: LazyGridState
 ) {
     val imageSize = calculateOptimalImageSize(columns, spacing)
     LazyVerticalGrid(
+        state = gridState,
         columns = GridCells.Fixed(columns),
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(spacing),
         verticalArrangement = Arrangement.spacedBy(spacing),
         horizontalArrangement = Arrangement.spacedBy(spacing)
     ) {
-        GridItems(
+        gridItems(
             lazyPagingItems = lazyPagingItems,
             imageSize = imageSize,
             imageLoader = imageLoader,
             onItemClick = onItemClick
         )
-        GridAppendStateContent(appendState, isLoadingPhotos)
+        gridAppendState(appendState, isLoadingPhotos)
     }
 }
 
-private fun LazyGridScope.GridItems(
+private fun LazyGridScope.gridItems(
     lazyPagingItems: LazyPagingItems<ProcessedMediaItem>,
     imageSize: Dp,
     imageLoader: ImageLoader,
@@ -290,7 +281,7 @@ private fun LazyGridScope.GridItems(
     }
 }
 
-private fun LazyGridScope.GridAppendStateContent(
+private fun LazyGridScope.gridAppendState(
     appendState: LoadState,
     isLoadingPhotos: Boolean,
 ) {
@@ -376,38 +367,42 @@ fun UserImageItem(
     modifier: Modifier = Modifier,
     onClick: (Long) -> Unit = {}
 ) {
-    val imageRequest = rememberImageRequest(image)
-    AsyncImage(
-        model = imageRequest,
+    val context = LocalContext.current
+    val request = remember(image.file.path) {
+        ImageRequest.Builder(context)
+            .data(image.file)
+            .crossfade(true)
+            .diskCachePolicy(CachePolicy.DISABLED)
+            .memoryCachePolicy(CachePolicy.ENABLED)
+            .error(android.R.drawable.stat_notify_error)
+            .listener(
+                onSuccess = { _, _ ->
+                    LogManager.d("UserImageItem", "Loaded image ${image.mediaId}")
+                },
+                onError = { _, result ->
+                    LogManager.e(
+                        "UserImageItem",
+                        "Failed to load image ${image.mediaId}",
+                        result.throwable
+                    )
+                }
+            )
+            .build()
+    }
+    Image(
+        painter = rememberAsyncImagePainter(
+            model = request,
+            imageLoader = imageLoader,
+            placeholder = MildGrayPainter
+        ),
         contentDescription = "Image with ID ${image.mediaId} from camera",
+        contentScale = ContentScale.Crop,
         modifier = modifier
+            .animateItemPlacement()
             .size(size)
             .clip(RoundedCornerShape(8.dp))
-            .clickable { onClick(image.mediaId) },
-        placeholder = ColorPainter(MildGray),
-        contentScale = ContentScale.Crop,
-        imageLoader = imageLoader
+            .clickable { onClick(image.mediaId) }
     )
 }
 
-@Composable
-private fun rememberImageRequest(image: ProcessedMediaItem): ImageRequest {
-    return ImageRequest.Builder(LocalContext.current)
-        .data(image.file)
-        .diskCachePolicy(CachePolicy.DISABLED)
-        .memoryCachePolicy(CachePolicy.ENABLED)
-        .error(android.R.drawable.stat_notify_error)
-        .listener(
-            onError = { _, result ->
-                LogManager.e(
-                    "UserImageItem",
-                    "Failed to load image ${image.mediaId}",
-                    result.throwable
-                )
-            },
-            onSuccess = { _, _ ->
-                LogManager.d("UserImageItem", "Loaded image ${image.mediaId}")
-            }
-        )
-        .build()
-}
+
