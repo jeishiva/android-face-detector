@@ -1,6 +1,7 @@
 package com.experiment.facedetector.ui.screen
 
 import android.app.Activity
+import android.content.Context
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -253,7 +254,7 @@ private fun ImageGrid(
             lazyPagingItems = lazyPagingItems,
             imageSize = imageSize,
             imageLoader = imageLoader,
-            onItemClick = onItemClick
+            onItemClick = onItemClick,
         )
         gridAppendState(appendState, isLoadingPhotos)
     }
@@ -364,7 +365,6 @@ fun UserImageItem(
     image: ProcessedMediaItem,
     size: Dp,
     imageLoader: ImageLoader,
-    modifier: Modifier = Modifier,
     onClick: (Long) -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -397,7 +397,7 @@ fun UserImageItem(
         ),
         contentDescription = "Image with ID ${image.mediaId} from camera",
         contentScale = ContentScale.Crop,
-        modifier = modifier
+        modifier = Modifier
             .size(size)
             .clip(RoundedCornerShape(8.dp))
             .clickable { onClick(image.mediaId) }
@@ -405,3 +405,26 @@ fun UserImageItem(
 }
 
 
+@Composable
+private fun rememberImageRequest(image: ProcessedMediaItem, context: Context): ImageRequest {
+    return remember(image) {
+        ImageRequest.Builder(context)
+            .data(image.file)
+            .diskCachePolicy(CachePolicy.DISABLED)
+            .memoryCachePolicy(CachePolicy.ENABLED)
+            .error(android.R.drawable.stat_notify_error)
+            .listener(
+                onError = { _, result ->
+                    LogManager.e(
+                        "UserImageItem",
+                        "Failed to load image ${image.mediaId}",
+                        result.throwable
+                    )
+                },
+                onSuccess = { _, _ ->
+                    LogManager.d("UserImageItem", "Loaded image ${image.mediaId}")
+                }
+            )
+            .build()
+    }
+}
