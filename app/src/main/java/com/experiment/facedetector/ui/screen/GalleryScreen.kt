@@ -398,7 +398,6 @@ fun UserImageItem(
         contentDescription = "Image with ID ${image.mediaId} from camera",
         contentScale = ContentScale.Crop,
         modifier = modifier
-            .animateItemPlacement()
             .size(size)
             .clip(RoundedCornerShape(8.dp))
             .clickable { onClick(image.mediaId) }
