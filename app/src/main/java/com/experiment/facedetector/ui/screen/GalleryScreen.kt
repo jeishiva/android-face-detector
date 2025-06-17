@@ -1,6 +1,7 @@
 package com.experiment.facedetector.ui.screen
 
 import android.app.Activity
+import android.content.Context
 import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,15 +16,10 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -49,7 +45,6 @@ import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.work.WorkInfo
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
@@ -262,17 +257,17 @@ private fun ImageGrid(
         verticalArrangement = Arrangement.spacedBy(spacing),
         horizontalArrangement = Arrangement.spacedBy(spacing)
     ) {
-        GridItems(
+        gridItems(
             lazyPagingItems = lazyPagingItems,
             imageSize = imageSize,
             imageLoader = imageLoader,
-            onItemClick = onItemClick
+            onItemClick = onItemClick,
         )
-        GridAppendStateContent(appendState, isLoadingPhotos)
+        gridAppendStateContent(appendState, isLoadingPhotos)
     }
 }
 
-private fun LazyGridScope.GridItems(
+private fun LazyGridScope.gridItems(
     lazyPagingItems: LazyPagingItems<ProcessedMediaItem>,
     imageSize: Dp,
     imageLoader: ImageLoader,
@@ -294,7 +289,7 @@ private fun LazyGridScope.GridItems(
     }
 }
 
-private fun LazyGridScope.GridAppendStateContent(
+private fun LazyGridScope.gridAppendStateContent(
     appendState: LoadState,
     isLoadingPhotos: Boolean,
 ) {
@@ -377,14 +372,12 @@ fun UserImageItem(
     image: ProcessedMediaItem,
     size: Dp,
     imageLoader: ImageLoader,
-    modifier: Modifier = Modifier,
     onClick: (Long) -> Unit = {}
 ) {
-    val imageRequest = rememberImageRequest(image)
     AsyncImage(
-        model = imageRequest,
+        model = rememberImageRequest(image, LocalContext.current),
         contentDescription = "Image with ID ${image.mediaId} from camera",
-        modifier = modifier
+        modifier = Modifier
             .size(size)
             .clip(RoundedCornerShape(8.dp))
             .clickable { onClick(image.mediaId) },
@@ -395,23 +388,25 @@ fun UserImageItem(
 }
 
 @Composable
-private fun rememberImageRequest(image: ProcessedMediaItem): ImageRequest {
-    return ImageRequest.Builder(LocalContext.current)
-        .data(image.file)
-        .diskCachePolicy(CachePolicy.DISABLED)
-        .memoryCachePolicy(CachePolicy.ENABLED)
-        .error(android.R.drawable.stat_notify_error)
-        .listener(
-            onError = { _, result ->
-                LogManager.e(
-                    "UserImageItem",
-                    "Failed to load image ${image.mediaId}",
-                    result.throwable
-                )
-            },
-            onSuccess = { _, _ ->
-                LogManager.d("UserImageItem", "Loaded image ${image.mediaId}")
-            }
-        )
-        .build()
+private fun rememberImageRequest(image: ProcessedMediaItem, context: Context): ImageRequest {
+    return remember(image) {
+        ImageRequest.Builder(context)
+            .data(image.file)
+            .diskCachePolicy(CachePolicy.DISABLED)
+            .memoryCachePolicy(CachePolicy.ENABLED)
+            .error(android.R.drawable.stat_notify_error)
+            .listener(
+                onError = { _, result ->
+                    LogManager.e(
+                        "UserImageItem",
+                        "Failed to load image ${image.mediaId}",
+                        result.throwable
+                    )
+                },
+                onSuccess = { _, _ ->
+                    LogManager.d("UserImageItem", "Loaded image ${image.mediaId}")
+                }
+            )
+            .build()
+    }
 }

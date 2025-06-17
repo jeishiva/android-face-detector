@@ -14,6 +14,7 @@ import com.experiment.facedetector.common.LogManager
 import com.experiment.facedetector.data.local.worker.CameraImageWorker
 import com.experiment.facedetector.domain.entities.ProcessedMediaItem
 import com.experiment.facedetector.domain.repo.IMediaRepo
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -41,9 +42,11 @@ class GalleryViewModel(
         observeWorkStatus()
     }
 
+    @OptIn(FlowPreview::class)
     val userImageFlow: Flow<PagingData<ProcessedMediaItem>> =
         mediaRepo.getPagedMedia()
             .cachedIn(viewModelScope)
+            .debounce(200)
             .onEach {
                 LogManager.d("GalleryViewModel", "New paging data emitted")
             }
